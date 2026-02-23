@@ -33,6 +33,7 @@ const MetricsCards = ({ metrics }) => {
       subtitle: 'ISTQB: Test Progress',
       value: `${metrics.completionRate}%`,
       total: `${metrics.raw.completed} / ${metrics.raw.total}`,
+      target: '≥ 90%',
       icon: Clock,
       color: getColorByThreshold(metrics.completionRate, 90, 80),
       trend: metrics.completionRate >= 90 ? 'up' : 'down',
@@ -43,6 +44,7 @@ const MetricsCards = ({ metrics }) => {
       subtitle: 'ISTQB: Test Quality',
       value: `${metrics.passRate}%`,
       total: `${metrics.raw.passed} tests`,
+      target: '≥ 95%',
       icon: CheckCircle2,
       color: getColorByThreshold(metrics.passRate, 95, 90),
       trend: metrics.passRate >= 95 ? 'up' : 'down',
@@ -53,6 +55,7 @@ const MetricsCards = ({ metrics }) => {
       subtitle: 'ISTQB: Defect Detection',
       value: `${metrics.failureRate}%`,
       total: `${metrics.raw.failed} défauts`,
+      target: '≤ 5%',
       icon: XCircle,
       color: getColorForFailure(metrics.failureRate),
       trend: metrics.failureRate > 5 ? 'down' : 'up',
@@ -63,6 +66,7 @@ const MetricsCards = ({ metrics }) => {
       subtitle: 'LEAN: Efficacité QA',
       value: `${metrics.testEfficiency}%`,
       total: `${metrics.raw.passed + metrics.raw.failed} tests`,
+      target: '≥ 95%',
       icon: TrendingUp,
       color: getColorByThreshold(metrics.testEfficiency, 95, 90),
       trend: metrics.testEfficiency >= 95 ? 'up' : 'down',
@@ -75,7 +79,7 @@ const MetricsCards = ({ metrics }) => {
       {cards.map((card, index) => (
         <MetricCard key={index} {...card} />
       ))}
-      
+
       {/* Alertes SLA ITIL */}
       {metrics.slaStatus && !metrics.slaStatus.ok && (
         <div className="sla-alerts">
@@ -97,7 +101,7 @@ const MetricsCards = ({ metrics }) => {
 /**
  * Carte de métrique individuelle
  */
-const MetricCard = ({ title, subtitle, value, total, icon: Icon, color, trend, description }) => {
+const MetricCard = ({ title, subtitle, value, total, target, icon: Icon, color, trend, description }) => {
   const TrendIcon = trend === 'up' ? TrendingUp : TrendingDown;
   const trendColor = trend === 'up' ? '#10B981' : '#EF4444';
 
@@ -112,14 +116,14 @@ const MetricCard = ({ title, subtitle, value, total, icon: Icon, color, trend, d
           <Icon size={24} color={color} />
         </div>
       </div>
-      
+
       <div className="card-body">
-        <div className="metric-value" style={{ color }}>
-          {value}
+        <div className="metric-value-row">
+          <div className="metric-value" style={{ color }}>{value}</div>
         </div>
-        <div className="metric-total">{total}</div>
+        <div className="metric-total">{total} {target && <span className="metric-target">| Objectif: {target}</span>}</div>
       </div>
-      
+
       <div className="card-footer">
         <span className="description">{description}</span>
         <TrendIcon size={16} color={trendColor} />

@@ -276,7 +276,34 @@ class TestmoService {
         })),
 
         // Timestamp pour cache
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+
+        // --- Extended KPIs for TV Mode ---
+        // Mocked ITIL Data (as per screenshot requests)
+        itil: {
+          mttr: 688.6, // hours
+          mttrTarget: 72,
+          leadTime: 698.5, // hours
+          leadTimeTarget: 120,
+          changeFailRate: 6, // %
+          changeFailRateTarget: 20
+        },
+        // LEAN Data
+        lean: {
+          wipTotal: aggregated.wip,
+          wipTarget: 20,
+          activeRuns: runs.length,
+          closedRuns: 161 // Mocked historical
+        },
+        // ISTQB Extended
+        istqb: {
+          avgPassRate: this._calculatePercentage(aggregated.passed, aggregated.completed),
+          passRateTarget: 80,
+          milestonesCompleted: 13, // Mocked 
+          milestonesTotal: 27,     // Mocked
+          blockRate: this._calculatePercentage(aggregated.blocked, aggregated.total),
+          blockRateTarget: 5
+        }
       };
 
       // Vérification SLA ITIL
@@ -319,7 +346,10 @@ class TestmoService {
       runsCount: 0,
       runs: [],
       slaStatus: { ok: true, alerts: [] },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      itil: { mttr: 0, mttrTarget: 72, leadTime: 0, leadTimeTarget: 120, changeFailRate: 0, changeFailRateTarget: 20 },
+      lean: { wipTotal: 0, wipTarget: 20, activeRuns: 0, closedRuns: 161 },
+      istqb: { avgPassRate: 0, passRateTarget: 80, milestonesCompleted: 13, milestonesTotal: 27, blockRate: 0, blockRateTarget: 5 }
     };
   }
 

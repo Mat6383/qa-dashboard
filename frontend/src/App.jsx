@@ -18,13 +18,15 @@ import apiService from './services/api.service';
 import MetricsCards from './components/MetricsCards';
 import StatusChart from './components/StatusChart';
 import RunsList from './components/RunsList';
+import TvDashboard from './components/TvDashboard';
 import {
   RefreshCw,
   AlertCircle,
   Activity,
   Settings,
   Database,
-  CheckCircle2
+  CheckCircle2,
+  Monitor
 } from 'lucide-react';
 import './styles/App.css';
 
@@ -37,6 +39,7 @@ function App() {
   const [error, setError] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
+  const [tvMode, setTvMode] = useState(true);
   const [backendStatus, setBackendStatus] = useState('checking');
 
   /**
@@ -201,6 +204,16 @@ function App() {
             </select>
           )}
 
+          {/* Toggle TV Mode */}
+          <button
+            className={`btn-toggle ${tvMode ? 'active' : ''}`}
+            onClick={() => setTvMode(!tvMode)}
+            title="Mode TV"
+          >
+            <Monitor size={16} />
+            {tvMode ? 'Mode TV' : 'Mode Standard'}
+          </button>
+
           {/* Toggle auto-refresh */}
           <button
             className={`btn-toggle ${autoRefresh ? 'active' : ''}`}
@@ -235,50 +248,59 @@ function App() {
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="app-main">
-        {loading && !metrics ? (
-          <div className="loading-container">
-            <RefreshCw size={48} className="spinner" />
-            <p>Chargement des métriques ISTQB...</p>
-          </div>
-        ) : (
-          <>
-            {/* Métriques ISTQB */}
-            <section className="section">
-              <MetricsCards metrics={metrics} />
-            </section>
-
-            {/* Graphiques */}
-            <section className="section charts-section">
-              <div className="chart-container">
-                <StatusChart metrics={metrics} chartType="doughnut" />
+      {/* Main Content & Footer Conditional Render */}
+      {tvMode ? (
+        <TvDashboard
+          metrics={metrics}
+          project={projects.find(p => p.id === projectId)}
+        />
+      ) : (
+        <>
+          <main className="app-main">
+            {loading && !metrics ? (
+              <div className="loading-container">
+                <RefreshCw size={48} className="spinner" />
+                <p>Chargement des métriques ISTQB...</p>
               </div>
-              <div className="chart-container">
-                <StatusChart metrics={metrics} chartType="bar" />
-              </div>
-            </section>
+            ) : (
+              <>
+                {/* Métriques ISTQB */}
+                <section className="section">
+                  <MetricsCards metrics={metrics} />
+                </section>
 
-            {/* Liste des runs */}
-            <section className="section">
-              <RunsList metrics={metrics} />
-            </section>
-          </>
-        )}
-      </main>
+                {/* Graphiques */}
+                <section className="section charts-section">
+                  <div className="chart-container">
+                    <StatusChart metrics={metrics} chartType="doughnut" />
+                  </div>
+                  <div className="chart-container">
+                    <StatusChart metrics={metrics} chartType="bar" />
+                  </div>
+                </section>
 
-      {/* Footer */}
-      <footer className="app-footer">
-        <div className="footer-content">
-          <span>© 2026 Neo-Logix | QA Dashboard by Matou</span>
-          {lastUpdate && (
-            <span className="last-update">
-              Dernière mise à jour: {lastUpdate.toLocaleTimeString('fr-FR')}
-            </span>
-          )}
-          <span>Standards: ISTQB | LEAN | ITIL</span>
-        </div>
-      </footer>
+                {/* Liste des runs */}
+                <section className="section">
+                  <RunsList metrics={metrics} />
+                </section>
+              </>
+            )}
+          </main>
+
+          {/* Footer */}
+          <footer className="app-footer">
+            <div className="footer-content">
+              <span>© 2026 Neo-Logix | QA Dashboard by Matou</span>
+              {lastUpdate && (
+                <span className="last-update">
+                  Dernière mise à jour: {lastUpdate.toLocaleTimeString('fr-FR')}
+                </span>
+              )}
+              <span>Standards: ISTQB | LEAN | ITIL</span>
+            </div>
+          </footer>
+        </>
+      )}
     </div>
   );
 }

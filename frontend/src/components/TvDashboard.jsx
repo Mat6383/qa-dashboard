@@ -1,0 +1,216 @@
+import React, { useState, useEffect } from 'react';
+import { Settings, BarChart2, Shield, AlertTriangle, PlayCircle, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import '../styles/TvDashboard.css';
+
+const TvDashboard = ({ metrics, project }) => {
+    const [currentDate, setCurrentDate] = useState(new Date());
+
+    useEffect(() => {
+        const timer = setInterval(() => setCurrentDate(new Date()), 1000);
+        return () => clearInterval(timer);
+    }, []);
+
+    if (!metrics) {
+        return <div className="tv-dashboard" style={{ justifyContent: 'center', alignItems: 'center' }}>Chargement des données TV...</div>;
+    }
+
+    // Calculate global state
+    const isCritical = metrics.passRate < 80 || metrics.lean?.wipTotal > 20 || metrics.itil?.changeFailRate > 20;
+    const isWarning = metrics.passRate >= 80 && metrics.passRate < 90;
+    const globalStateClass = isCritical ? 'critical' : (isWarning ? 'warning' : 'ok');
+    const globalStateText = isCritical ? 'CRITIQUE' : (isWarning ? 'ATTENTION' : 'OK');
+
+    return (
+        <div className="tv-dashboard">
+            {/* Top Header */}
+            <div className="tv-header-info">
+                <span style={{ color: '#60A5FA', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <Shield size={16} /> NEO-FUGU — Dashboard QA Testmo
+                </span>
+            </div>
+            <div className="tv-header-meta">
+                Généré le {currentDate.toLocaleDateString('fr-FR')} {currentDate.toLocaleTimeString('fr-FR')} • ISTQB • LEAN • ITIL • Refresh auto 5min
+            </div>
+
+            {/* Global State Badge */}
+            <div className="tv-global-state">
+                <div className={`state-badge ${globalStateClass}`}>
+                    <div className="state-title">ÉTAT GLOBAL QA</div>
+                    <div className="state-value">
+                        <span className={`legend-dot ${globalStateClass}`}></span>
+                        {globalStateText}
+                    </div>
+                    {isCritical && <div className="state-action tv-color-red">Action requise</div>}
+                </div>
+            </div>
+
+            {/* Legends */}
+            <div className="tv-legend">
+                <div className="legend-item"><span className="legend-dot ok"></span> OK</div>
+                <div className="legend-item"><span className="legend-dot attention"></span> Attention</div>
+                <div className="legend-item"><span className="legend-dot critique"></span> Critique</div>
+                <div>| Pass ≥80%</div>
+                <div>MTTR ≤72h</div>
+                <div>WIP ≤20</div>
+                <div>CFR ≤20%</div>
+            </div>
+
+            {/* Main Project Card */}
+            <div className="tv-project-card">
+                <div className="project-header">
+                    <div className="project-subtitle">
+                        🏆 PROJET PRINCIPAL
+                    </div>
+                    <h2 className="project-title">{project?.name || 'Neo-Pilot'}</h2>
+                    <div className="project-tags">
+                        {metrics.lean?.activeRuns} actifs • 163 total • {metrics.istqb?.milestonesCompleted}/{metrics.istqb?.milestonesTotal} milestones
+                    </div>
+                </div>
+
+                {(isWarning || isCritical) && (
+                    <div className="tv-vigilance">
+                        <h4><AlertTriangle size={16} /> ATTENTION</h4>
+                        <p>Points de vigilance detectés sur les KPIs en dessous des objectifs.</p>
+                    </div>
+                )}
+
+                {/* ISTQB Section */}
+                <div className="kpi-section">
+                    <div className="kpi-section-title"><BarChart2 size={16} /> ISTQB</div>
+                    <div className="kpi-grid">
+                        <div className="kpi-card">
+                            <div className="kpi-card-title">ISTQB<br />Avg Pass Rate</div>
+                            <div className={`kpi-card-value ${(metrics.istqb?.avgPassRate >= metrics.istqb?.passRateTarget) ? 'success' : 'danger'}`}>
+                                {metrics.istqb?.avgPassRate}%
+                            </div>
+                            <div className="kpi-card-target">≥ {metrics.istqb?.passRateTarget}%</div>
+                        </div>
+                        <div className="kpi-card">
+                            <div className="kpi-card-title">ISTQB<br />Milestones</div>
+                            <div className="kpi-card-value warning">
+                                {metrics.istqb?.milestonesCompleted}/{metrics.istqb?.milestonesTotal}
+                            </div>
+                            <div className="kpi-card-target">{Math.round((metrics.istqb?.milestonesCompleted / metrics.istqb?.milestonesTotal) * 100)}%</div>
+                        </div>
+                        <div className="kpi-card">
+                            <div className="kpi-card-title">ISTQB<br />Block Rate</div>
+                            <div className={`kpi-card-value ${(metrics.istqb?.blockRate <= metrics.istqb?.blockRateTarget) ? 'success' : 'warning'}`}>
+                                {metrics.istqb?.blockRate}%
+                            </div>
+                            <div className="kpi-card-target">≤ {metrics.istqb?.blockRateTarget}%</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* ITIL Section */}
+                <div className="kpi-section">
+                    <div className="kpi-section-title"><Settings size={16} /> ITIL</div>
+                    <div className="kpi-grid">
+                        <div className="kpi-card">
+                            <div className="kpi-card-title">ITIL<br />MTTR Moyen</div>
+                            <div className={`kpi-card-value ${(metrics.itil?.mttr <= metrics.itil?.mttrTarget) ? 'info' : 'danger'}`}>
+                                {metrics.itil?.mttr}h
+                            </div>
+                            <div className="kpi-card-target">≤ {metrics.itil?.mttrTarget}h</div>
+                        </div>
+                        <div className="kpi-card">
+                            <div className="kpi-card-title">ITIL<br />Lead Time</div>
+                            <div className={`kpi-card-value ${(metrics.itil?.leadTime <= metrics.itil?.leadTimeTarget) ? 'info' : 'danger'}`}>
+                                {metrics.itil?.leadTime}h
+                            </div>
+                            <div className="kpi-card-target">≤ {metrics.itil?.leadTimeTarget}h</div>
+                        </div>
+                        <div className="kpi-card">
+                            <div className="kpi-card-title">ITIL<br />Change Fail Rate</div>
+                            <div className={`kpi-card-value ${(metrics.itil?.changeFailRate <= metrics.itil?.changeFailRateTarget) ? 'success' : 'danger'}`}>
+                                {metrics.itil?.changeFailRate}%
+                            </div>
+                            <div className="kpi-card-target">≤ {metrics.itil?.changeFailRateTarget}%</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* LEAN Section */}
+                <div className="kpi-section">
+                    <div className="kpi-section-title"><RefreshCw size={16} /> LEAN</div>
+                    <div className="kpi-grid">
+                        <div className="kpi-card">
+                            <div className="kpi-card-title">LEAN<br />WIP Total</div>
+                            <div className={`kpi-card-value ${(metrics.lean?.wipTotal <= metrics.lean?.wipTarget) ? 'success' : 'warning'}`}>
+                                {metrics.lean?.wipTotal}
+                            </div>
+                            <div className="kpi-card-target">≤ {metrics.lean?.wipTarget}</div>
+                        </div>
+                        <div className="kpi-card">
+                            <div className="kpi-card-title">LEAN<br />Runs Actifs</div>
+                            <div className="kpi-card-value success">
+                                {metrics.lean?.activeRuns}
+                            </div>
+                            <div className="kpi-card-target">En cours</div>
+                        </div>
+                        <div className="kpi-card">
+                            <div className="kpi-card-title">LEAN<br />Runs Fermés</div>
+                            <div className="kpi-card-value info">
+                                {metrics.lean?.closedRuns}
+                            </div>
+                            <div className="kpi-card-target">Complétés</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Runs List TV Style */}
+                <div className="tv-runs-list">
+                    <h3><RefreshCw size={16} /> Runs Actifs ({metrics.runs?.length})</h3>
+
+                    {metrics.runs && metrics.runs.map((run) => (
+                        <div className="tv-run-card" key={run.id}>
+                            <div className="tv-run-header">
+                                <div className="tv-run-name"><RefreshCw size={16} /> {run.name}</div>
+                                <div className="tv-run-age"><Clock size={14} /> ID: {run.id}</div>
+                            </div>
+
+                            <div className="tv-run-progress">
+                                <div className="tv-run-progress-col" style={{ flex: '2', marginRight: '2rem' }}>
+                                    <div className="tv-run-progress-label">Progression</div>
+                                    <div className="tv-run-progress-bar-bg">
+                                        <div className="tv-run-progress-bar-fill" style={{ width: `${run.completionRate}%` }}></div>
+                                    </div>
+                                    <div className="tv-run-progress-text">{run.completionRate}%</div>
+                                </div>
+
+                                <div className="tv-run-passrate">
+                                    <div className="tv-run-passrate-label"><CheckCircle2 className="ok" size={14} /> Pass Rate</div>
+                                    <div className={`tv-run-passrate-value ${(run.passRate >= 80) ? 'tv-color-green' : 'tv-color-yellow'}`}>
+                                        {run.passRate}%
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="tv-run-metrics-grid">
+                                <div className="tv-run-metric">
+                                    <div className="tv-run-metric-label"><XCircle size={12} /> Failures</div>
+                                    <div className="tv-run-metric-value tv-color-red">...</div>
+                                </div>
+                                <div className="tv-run-metric">
+                                    <div className="tv-run-metric-label"><AlertTriangle size={12} /> Blocked</div>
+                                    <div className="tv-run-metric-value tv-color-red">...</div>
+                                </div>
+                                <div className="tv-run-metric">
+                                    <div className="tv-run-metric-label"><Clock size={12} /> WIP</div>
+                                    <div className="tv-run-metric-value tv-color-yellow">...</div>
+                                </div>
+                                <div className="tv-run-metric">
+                                    <div className="tv-run-metric-label">⏭ Skipped</div>
+                                    <div className="tv-run-metric-value tv-color-gray">...</div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+            </div>
+        </div>
+    );
+};
+
+export default TvDashboard;

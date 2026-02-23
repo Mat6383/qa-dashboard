@@ -1,0 +1,360 @@
+/**
+ * ================================================
+ * TV DASHBOARD - Styles (Dark Mode Presentation)
+ * ================================================
+ */
+
+.tv-dashboard {
+  background-color: #0B1120;
+  color: #E2E8F0;
+  padding: 2rem;
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.tv-header-info {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 1rem;
+  color: #9CA3AF;
+  font-size: 0.875rem;
+}
+
+.tv-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #3B82F6;
+}
+
+.tv-header-meta {
+  display: flex;
+  gap: 1rem;
+}
+
+.tv-global-state {
+  margin: 1rem 0;
+  display: inline-block;
+}
+
+.state-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 2px solid;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  background-color: #1F2937;
+}
+
+.state-badge.critical {
+  border-color: #EF4444;
+}
+.state-badge.warning {
+  border-color: #F59E0B;
+}
+.state-badge.ok {
+  border-color: #10B981;
+}
+
+.state-title {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #9CA3AF;
+  margin-bottom: 0.25rem;
+}
+
+.state-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.state-badge.critical .state-value {
+  color: #EF4444;
+}
+
+.state-action {
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  opacity: 0.8;
+}
+
+.tv-legend {
+  display: flex;
+  gap: 1.5rem;
+  font-size: 0.875rem;
+  color: #D1D5DB;
+  border-top: 1px solid #374151;
+  border-bottom: 1px solid #374151;
+  padding: 1rem 0;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.legend-dot.ok { background-color: #10B981; }
+.legend-dot.attention { background-color: #F59E0B; }
+.legend-dot.critique { background-color: #EF4444; }
+
+.tv-project-card {
+  background-color: #111827;
+  border: 1px solid #1E3A8A;
+  border-radius: 1rem;
+  padding: 2rem;
+}
+
+.project-header {
+  margin-bottom: 1.5rem;
+}
+
+.project-subtitle {
+  color: #D1D5DB;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.project-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #60A5FA;
+  margin-bottom: 0.5rem;
+}
+
+.project-tags {
+  display: inline-flex;
+  background-color: rgba(30, 58, 138, 0.5);
+  color: #60A5FA;
+  padding: 0.25rem 0.75rem;
+  border-radius: 1rem;
+  font-size: 0.875rem;
+}
+
+.tv-vigilance {
+  background-color: rgba(180, 83, 9, 0.2);
+  border: 1px solid #B45309;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  display: inline-flex;
+  flex-direction: column;
+  color: #FCD34D;
+  margin-bottom: 2rem;
+}
+.tv-vigilance h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+.tv-vigilance p {
+  font-size: 0.875rem;
+}
+
+.kpi-section {
+  border: 1px solid #374151;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.kpi-section-title {
+  font-size: 0.875rem;
+  color: #9CA3AF;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.kpi-card {
+  background-color: #1F2937;
+  border: 1px solid #374151;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.kpi-card-title {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.kpi-card-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.kpi-card-value.success { color: #10B981; }
+.kpi-card-value.warning { color: #F59E0B; }
+.kpi-card-value.danger { color: #EF4444; }
+.kpi-card-value.info { color: #60A5FA; }
+
+.kpi-card-target {
+  font-size: 0.75rem;
+  color: #6B7280;
+}
+
+/* TV Runs section overrides */
+.tv-runs-list {
+  margin-top: 2rem;
+}
+
+.tv-runs-list h3 {
+  color: #9CA3AF;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tv-run-card {
+  background-color: #0B1120;
+  border: 1px solid #1E3A8A;
+  border-left: 4px solid #3B82F6;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.tv-run-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.tv-run-name {
+  color: #9CA3AF;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.tv-run-age {
+  color: #F59E0B;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.tv-run-progress {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.tv-run-progress-col {
+  flex: 1;
+}
+
+.tv-run-progress-label {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  margin-bottom: 0.5rem;
+}
+
+.tv-run-progress-bar-bg {
+  height: 4px;
+  background-color: #1F2937;
+  border-radius: 2px;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+
+.tv-run-progress-bar-fill {
+  height: 100%;
+  background-color: #3B82F6;
+}
+
+.tv-run-progress-text {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #E2E8F0;
+}
+
+.tv-run-passrate {
+  text-align: right;
+}
+
+.tv-run-passrate-label {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+.tv-run-passrate-label .ok { color: #10B981; }
+
+.tv-run-passrate-value {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: #F59E0B;
+}
+
+.tv-run-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.tv-run-metric {
+  display: flex;
+  flex-direction: column;
+}
+
+.tv-run-metric-label {
+  font-size: 0.75rem;
+  color: #9CA3AF;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.tv-run-metric-value {
+  font-size: 1.125rem;
+  font-weight: bold;
+}
+
+.tv-color-red { color: #EF4444; }
+.tv-color-green { color: #10B981; }
+.tv-color-yellow { color: #F59E0B; }
+.tv-color-gray { color: #D1D5DB; }
