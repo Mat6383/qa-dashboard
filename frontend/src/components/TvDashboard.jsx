@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, BarChart2, Shield, AlertTriangle, PlayCircle, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { Settings, BarChart2, Shield, AlertTriangle, PlayCircle, CheckCircle2, XCircle, Clock, RefreshCw } from 'lucide-react';
 import '../styles/TvDashboard.css';
 
 const TvDashboard = ({ metrics, project }) => {
