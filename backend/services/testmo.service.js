@@ -218,9 +218,9 @@ class TestmoService {
         untested: acc.untested + (run.untested_count || 0),
         passed: acc.passed + (run.status1_count || 0),
         failed: acc.failed + (run.status2_count || 0),
-        retest: acc.retest + (run.status4_count || 0),
-        blocked: acc.blocked + (run.status5_count || 0),
-        skipped: acc.skipped + (run.status6_count || 0),
+        retest: acc.retest + (run.status3_count || 0),
+        blocked: acc.blocked + (run.status4_count || 0),
+        skipped: acc.skipped + (run.status5_count || 0),
         wip: acc.wip + (run.status7_count || 0),
         completed: acc.completed + (run.completed_count || 0),
         success: acc.success + (run.success_count || 0),
@@ -251,16 +251,17 @@ class TestmoService {
 
         // Distribution par statut (pour graphiques)
         statusDistribution: {
-          labels: ['Passed', 'Failed', 'Blocked', 'Skipped', 'Untested', 'WIP'],
+          labels: ['Passed', 'Failed', 'Retest', 'Blocked', 'Skipped', 'Untested', 'WIP'],
           values: [
             aggregated.passed,
             aggregated.failed,
+            aggregated.retest,
             aggregated.blocked,
             aggregated.skipped,
             aggregated.untested,
             aggregated.wip
           ],
-          colors: ['#10B981', '#EF4444', '#F59E0B', '#6B7280', '#E5E7EB', '#3B82F6']
+          colors: ['#10B981', '#EF4444', '#8B5CF6', '#F59E0B', '#6B7280', '#E5E7EB', '#3B82F6']
         },
 
         // Runs détails
@@ -311,9 +312,9 @@ class TestmoService {
       skippedRate: 0,
       testEfficiency: 0,
       statusDistribution: {
-        labels: ['Passed', 'Failed', 'Blocked', 'Skipped', 'Untested', 'WIP'],
-        values: [0, 0, 0, 0, 0, 0],
-        colors: ['#10B981', '#EF4444', '#F59E0B', '#6B7280', '#E5E7EB', '#3B82F6']
+        labels: ['Passed', 'Failed', 'Retest', 'Blocked', 'Skipped', 'Untested', 'WIP'],
+        values: [0, 0, 0, 0, 0, 0, 0],
+        colors: ['#10B981', '#EF4444', '#8B5CF6', '#F59E0B', '#6B7280', '#E5E7EB', '#3B82F6']
       },
       runsCount: 0,
       runs: [],
