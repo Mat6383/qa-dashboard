@@ -261,7 +261,7 @@ class TestmoService {
             aggregated.untested,
             aggregated.wip
           ],
-          colors: ['#10B981', '#EF4444', '#8B5CF6', '#F59E0B', '#6B7280', '#E5E7EB', '#3B82F6']
+          colors: ['#10B981', '#EF4444', '#8B5CF6', '#F59E0B', '#6B7280', '#9CA3AF', '#3B82F6']
         },
 
         // Runs détails
@@ -314,7 +314,7 @@ class TestmoService {
       statusDistribution: {
         labels: ['Passed', 'Failed', 'Retest', 'Blocked', 'Skipped', 'Untested', 'WIP'],
         values: [0, 0, 0, 0, 0, 0, 0],
-        colors: ['#10B981', '#EF4444', '#8B5CF6', '#F59E0B', '#6B7280', '#E5E7EB', '#3B82F6']
+        colors: ['#10B981', '#EF4444', '#8B5CF6', '#F59E0B', '#6B7280', '#9CA3AF', '#3B82F6']
       },
       runsCount: 0,
       runs: [],
