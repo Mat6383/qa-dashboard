@@ -6,7 +6,7 @@
  * 
  * Standards:
  * - ISTQB: Test Monitoring & Control
- * - LEAN: Auto-refresh 30s
+ * - LEAN: Auto-refresh 5m
  * - ITIL: Service Level Management
  * 
  * @author Matou - Neo-Logix QA Lead
@@ -18,10 +18,10 @@ import apiService from './services/api.service';
 import MetricsCards from './components/MetricsCards';
 import StatusChart from './components/StatusChart';
 import RunsList from './components/RunsList';
-import { 
-  RefreshCw, 
-  AlertCircle, 
-  Activity, 
+import {
+  RefreshCw,
+  AlertCircle,
+  Activity,
   Settings,
   Database,
   CheckCircle2
@@ -76,7 +76,7 @@ function App() {
       setError(null);
 
       const response = await apiService.getDashboardMetrics(projectId);
-      
+
       if (response.success) {
         setMetrics(response.data);
         setLastUpdate(new Date());
@@ -121,14 +121,14 @@ function App() {
     loadDashboardMetrics();
   }, [checkBackendHealth, loadProjects, loadDashboardMetrics]);
 
-  // Effet: Auto-refresh toutes les 30s (LEAN)
+  // Effet: Auto-refresh toutes les 5m (LEAN)
   useEffect(() => {
     if (!autoRefresh) return;
 
     const interval = setInterval(() => {
       console.log('[Auto-refresh] Rechargement des métriques...');
       loadDashboardMetrics();
-    }, 30000); // 30 secondes
+    }, 300000); // 5 minutes
 
     return () => clearInterval(interval);
   }, [autoRefresh, loadDashboardMetrics]);
@@ -188,8 +188,8 @@ function App() {
         <div className="header-right">
           {/* Sélecteur de projet */}
           {projects.length > 0 && (
-            <select 
-              value={projectId} 
+            <select
+              value={projectId}
               onChange={handleProjectChange}
               className="project-selector"
             >
@@ -205,7 +205,7 @@ function App() {
           <button
             className={`btn-toggle ${autoRefresh ? 'active' : ''}`}
             onClick={() => setAutoRefresh(!autoRefresh)}
-            title="Auto-refresh 30s"
+            title="Auto-refresh 5m"
           >
             <RefreshCw size={16} className={autoRefresh ? 'spinning' : ''} />
             {autoRefresh ? 'Auto ON' : 'Auto OFF'}

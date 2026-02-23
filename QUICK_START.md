@@ -102,8 +102,7 @@ Ouvrir http://localhost:3000
 ---
 
 ## 🔄 Auto-Refresh
-
-Le dashboard se rafraîchit automatiquement toutes les **30 secondes** (LEAN)
+Le dashboard se rafraîchit automatiquement toutes les **5 minutes** (LEAN)
 
 Pour désactiver : Bouton "Auto OFF" dans le header
 
