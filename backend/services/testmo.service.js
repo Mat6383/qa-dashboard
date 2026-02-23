@@ -207,6 +207,17 @@ class TestmoService {
       const runsData = await this.getProjectRuns(projectId, true);
       const runs = runsData.result || [];
 
+      // Fetch dynamic TV metrics (Closed Runs & Milestones)
+      const [closedRunsResponse, milestonesResponse] = await Promise.all([
+        this.client.get(`/projects/${projectId}/runs`, { params: { is_closed: 1, per_page: 1 } }).catch(() => ({ data: { total: 0 } })),
+        this.client.get(`/projects/${projectId}/milestones`, { params: { per_page: 100 } }).catch(() => ({ data: { result: [] } }))
+      ]);
+
+      const closedRunsCount = closedRunsResponse.data.total || 0;
+      const milestones = milestonesResponse.data.result || [];
+      const milestonesTotal = milestones.length || 1; // avoid division by zero
+      const milestonesCompleted = milestones.filter(m => m.is_completed).length;
+
       if (runs.length === 0) {
         logger.warn(`No active runs found for project ${projectId}`);
         return this._getEmptyMetrics();
@@ -230,6 +241,10 @@ class TestmoService {
         retest: 0, blocked: 0, skipped: 0, wip: 0,
         completed: 0, success: 0, failure: 0
       });
+
+      // Dynamic ITIL-like calculations based on real run data
+      const leadTime = Math.round(runs.reduce((acc, r) => acc + (Date.now() - new Date(r.created_at).getTime()) / (1000 * 3600), 0) / (runs.length || 1) * 10) / 10;
+      const mttr = Math.round(leadTime * (aggregated.failed / (aggregated.passed || 1)) * 10) / 10;
 
       // Calculs ISTQB
       const metrics = {
@@ -270,37 +285,46 @@ class TestmoService {
           id: run.id,
           name: run.name,
           completionRate: this._calculatePercentage(run.completed_count, run.total_count),
-          passRate: this._calculatePercentage(run.status2_count, run.completed_count),
+          passRate: this._calculatePercentage(run.status1_count, run.completed_count),
           created_at: run.created_at,
-          milestone: run.milestone_id
+          milestone: run.milestone_id,
+          total: run.total_count || 0,
+          completed: run.completed_count || 0,
+          passed: run.status1_count || 0,
+          failed: run.status2_count || 0,
+          retest: run.status3_count || 0,
+          blocked: run.status4_count || 0,
+          skipped: run.status5_count || 0,
+          wip: run.status7_count || 0,
+          untested: run.untested_count || 0
         })),
 
         // Timestamp pour cache
         timestamp: new Date().toISOString(),
 
         // --- Extended KPIs for TV Mode ---
-        // Mocked ITIL Data (as per screenshot requests)
+        // ITIL Data derived dynamically
         itil: {
-          mttr: 688.6, // hours
+          mttr: mttr, // hours
           mttrTarget: 72,
-          leadTime: 698.5, // hours
+          leadTime: leadTime, // hours
           leadTimeTarget: 120,
-          changeFailRate: 6, // %
+          changeFailRate: this._calculatePercentage(aggregated.failed, aggregated.completed), // %
           changeFailRateTarget: 20
         },
-        // LEAN Data
+        // LEAN Data dynamically queried
         lean: {
           wipTotal: aggregated.wip,
           wipTarget: 20,
           activeRuns: runs.length,
-          closedRuns: 161 // Mocked historical
+          closedRuns: closedRunsCount
         },
         // ISTQB Extended
         istqb: {
           avgPassRate: this._calculatePercentage(aggregated.passed, aggregated.completed),
           passRateTarget: 80,
-          milestonesCompleted: 13, // Mocked 
-          milestonesTotal: 27,     // Mocked
+          milestonesCompleted: milestonesCompleted,
+          milestonesTotal: milestonesTotal,
           blockRate: this._calculatePercentage(aggregated.blocked, aggregated.total),
           blockRateTarget: 5
         }

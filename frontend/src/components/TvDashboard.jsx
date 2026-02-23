@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Settings, BarChart2, Shield, AlertTriangle, PlayCircle, CheckCircle2, XCircle, Clock, RefreshCw } from 'lucide-react';
+import { Settings, BarChart2, Shield, AlertTriangle, PlayCircle, CheckCircle2, XCircle, Clock, RefreshCw, CircleDashed, RotateCcw } from 'lucide-react';
 import '../styles/TvDashboard.css';
 
 const TvDashboard = ({ metrics, project }) => {
@@ -189,19 +189,27 @@ const TvDashboard = ({ metrics, project }) => {
                             <div className="tv-run-metrics-grid">
                                 <div className="tv-run-metric">
                                     <div className="tv-run-metric-label"><XCircle size={12} /> Failures</div>
-                                    <div className="tv-run-metric-value tv-color-red">...</div>
+                                    <div className="tv-run-metric-value tv-color-red">{run.failed !== undefined ? run.failed : '...'}</div>
                                 </div>
                                 <div className="tv-run-metric">
                                     <div className="tv-run-metric-label"><AlertTriangle size={12} /> Blocked</div>
-                                    <div className="tv-run-metric-value tv-color-red">...</div>
+                                    <div className="tv-run-metric-value tv-color-red">{run.blocked !== undefined ? run.blocked : '...'}</div>
                                 </div>
                                 <div className="tv-run-metric">
                                     <div className="tv-run-metric-label"><Clock size={12} /> WIP</div>
-                                    <div className="tv-run-metric-value tv-color-yellow">...</div>
+                                    <div className="tv-run-metric-value tv-color-yellow">{run.wip !== undefined ? run.wip : '...'}</div>
                                 </div>
                                 <div className="tv-run-metric">
                                     <div className="tv-run-metric-label">⏭ Skipped</div>
-                                    <div className="tv-run-metric-value tv-color-gray">...</div>
+                                    <div className="tv-run-metric-value tv-color-gray">{run.skipped !== undefined ? run.skipped : '...'}</div>
+                                </div>
+                                <div className="tv-run-metric">
+                                    <div className="tv-run-metric-label"><RotateCcw size={12} /> Retest</div>
+                                    <div className="tv-run-metric-value" style={{ color: '#8B5CF6' }}>{run.retest !== undefined ? run.retest : '...'}</div>
+                                </div>
+                                <div className="tv-run-metric">
+                                    <div className="tv-run-metric-label"><CircleDashed size={12} /> Untested</div>
+                                    <div className="tv-run-metric-value" style={{ color: '#9CA3AF' }}>{run.untested !== undefined ? run.untested : '...'}</div>
                                 </div>
                             </div>
                         </div>
