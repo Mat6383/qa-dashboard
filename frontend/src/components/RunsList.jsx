@@ -14,7 +14,7 @@ import React from 'react';
 import { PlayCircle, CheckCircle2, XCircle, Clock, Calendar } from 'lucide-react';
 import '../styles/RunsList.css';
 
-const RunsList = ({ metrics }) => {
+const RunsList = ({ metrics, useBusiness }) => {
   if (!metrics || !metrics.runs || metrics.runs.length === 0) {
     return (
       <div className="runs-empty">
@@ -29,14 +29,14 @@ const RunsList = ({ metrics }) => {
       <div className="runs-header">
         <h3>
           <PlayCircle size={20} />
-          Runs Actifs ({metrics.runsCount})
+          {useBusiness ? 'Campagnes Actives' : 'Runs Actifs'} ({metrics.runsCount})
         </h3>
         <span className="runs-subtitle">ISTQB: Test Execution Monitoring</span>
       </div>
 
       <div className="runs-grid">
         {metrics.runs.map((run, index) => (
-          <RunCard key={run.id} run={run} index={index} />
+          <RunCard key={run.id} run={run} index={index} useBusiness={useBusiness} />
         ))}
       </div>
     </div>
@@ -46,7 +46,7 @@ const RunsList = ({ metrics }) => {
 /**
  * Carte de run individuelle
  */
-const RunCard = ({ run, index }) => {
+const RunCard = ({ run, index, useBusiness }) => {
   const statusColor = getStatusColor(run.passRate);
   const completionColor = getCompletionColor(run.completionRate);
 
@@ -58,8 +58,8 @@ const RunCard = ({ run, index }) => {
           <h4 className="run-name">{run.name}</h4>
           <span className="run-id">ID: {run.id}</span>
         </div>
-        <div 
-          className="run-status-badge" 
+        <div
+          className="run-status-badge"
           style={{ backgroundColor: statusColor }}
         >
           {run.passRate >= 95 ? <CheckCircle2 size={16} /> : <XCircle size={16} />}
@@ -98,7 +98,7 @@ const RunCard = ({ run, index }) => {
           {formatDate(run.created_at)}
         </span>
         {run.milestone && (
-          <span className="run-milestone">Milestone: {run.milestone}</span>
+          <span className="run-milestone">{useBusiness ? 'Jalon' : 'Milestone'}: {run.milestone}</span>
         )}
       </div>
     </div>
@@ -111,11 +111,11 @@ const RunCard = ({ run, index }) => {
 const ProgressBar = ({ value, color }) => {
   return (
     <div className="progress-bar">
-      <div 
-        className="progress-bar-fill" 
-        style={{ 
+      <div
+        className="progress-bar-fill"
+        style={{
           width: `${value}%`,
-          backgroundColor: color 
+          backgroundColor: color
         }}
       />
     </div>

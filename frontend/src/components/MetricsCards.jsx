@@ -17,7 +17,7 @@ import React from 'react';
 import { TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, XCircle, Clock } from 'lucide-react';
 import '../styles/MetricsCards.css';
 
-const MetricsCards = ({ metrics }) => {
+const MetricsCards = ({ metrics, useBusiness }) => {
   if (!metrics) {
     return (
       <div className="metrics-loading">
@@ -29,7 +29,7 @@ const MetricsCards = ({ metrics }) => {
 
   const cards = [
     {
-      title: 'Completion Rate',
+      title: useBusiness ? 'Taux d\'Exécution' : 'Completion Rate',
       subtitle: 'ISTQB: Test Progress',
       value: `${metrics.completionRate}%`,
       total: `${metrics.raw.completed} / ${metrics.raw.total}`,
@@ -40,7 +40,7 @@ const MetricsCards = ({ metrics }) => {
       description: 'Tests exécutés vs total'
     },
     {
-      title: 'Pass Rate',
+      title: useBusiness ? 'Taux de Succès' : 'Pass Rate',
       subtitle: 'ISTQB: Test Quality',
       value: `${metrics.passRate}%`,
       total: `${metrics.raw.passed} tests`,
@@ -51,7 +51,7 @@ const MetricsCards = ({ metrics }) => {
       description: 'Tests réussis vs exécutés'
     },
     {
-      title: 'Failure Rate',
+      title: useBusiness ? 'Taux d\'Échec' : 'Failure Rate',
       subtitle: 'ISTQB: Defect Detection',
       value: `${metrics.failureRate}%`,
       total: `${metrics.raw.failed} défauts`,
@@ -62,7 +62,7 @@ const MetricsCards = ({ metrics }) => {
       description: 'Tests échoués détectés'
     },
     {
-      title: 'Test Efficiency',
+      title: useBusiness ? 'Efficience des Tests' : 'Test Efficiency',
       subtitle: 'LEAN: Efficacité QA',
       value: `${metrics.testEfficiency}%`,
       total: `${metrics.raw.passed + metrics.raw.failed} tests`,
@@ -85,7 +85,7 @@ const MetricsCards = ({ metrics }) => {
         <div className="sla-alerts">
           <AlertTriangle className="alert-icon" />
           <div className="alerts-content">
-            <h3>Alertes SLA ITIL</h3>
+            <h3>{useBusiness ? 'Seuils d\'Alerte SLA' : 'Alertes SLA ITIL'}</h3>
             {metrics.slaStatus.alerts.map((alert, idx) => (
               <div key={idx} className={`alert alert-${alert.severity}`}>
                 <strong>{alert.metric}:</strong> {alert.message}

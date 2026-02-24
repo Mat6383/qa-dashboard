@@ -40,6 +40,9 @@ function App() {
   const [lastUpdate, setLastUpdate] = useState(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [tvMode, setTvMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(false);
+  const [useDashboard2, setUseDashboard2] = useState(false);
+  const [useBusinessTerms, setUseBusinessTerms] = useState(false);
   const [backendStatus, setBackendStatus] = useState('checking');
 
   /**
@@ -175,7 +178,7 @@ function App() {
   }
 
   return (
-    <div className="app">
+    <div className={`app ${tvMode ? 'tv-mode' : ''} ${darkMode ? 'dark-theme' : ''}`}>
       {/* Header */}
       <header className="app-header">
         <div className="header-left">
@@ -214,6 +217,45 @@ function App() {
             {tvMode ? 'Mode TV' : 'Mode Standard'}
           </button>
 
+          {/* Toggle Dark Theme Switch */}
+          <div className="switch-container" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px', marginRight: '8px' }}>
+            <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-color)' }}>Dark thème</span>
+            <label className="theme-switch">
+              <input
+                type="checkbox"
+                checked={darkMode}
+                onChange={() => setDarkMode(!darkMode)}
+              />
+              <span className="slider round"></span>
+            </label>
+          </div>
+
+          {/* Toggle Dashboard 2 Switch */}
+          <div className="switch-container" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px', marginRight: '8px' }}>
+            <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-color)' }}>Dashboard 2</span>
+            <label className="theme-switch">
+              <input
+                type="checkbox"
+                checked={useDashboard2}
+                onChange={() => setUseDashboard2(!useDashboard2)}
+              />
+              <span className="slider round"></span>
+            </label>
+          </div>
+
+          {/* Toggle Vocabulaire Métier Switch */}
+          <div className="switch-container" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px', marginRight: '8px' }}>
+            <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-color)' }}>Vocabulaire Métier</span>
+            <label className="theme-switch">
+              <input
+                type="checkbox"
+                checked={useBusinessTerms}
+                onChange={() => setUseBusinessTerms(!useBusinessTerms)}
+              />
+              <span className="slider round"></span>
+            </label>
+          </div>
+
           {/* Toggle auto-refresh */}
           <button
             className={`btn-toggle ${autoRefresh ? 'active' : ''}`}
@@ -248,59 +290,57 @@ function App() {
         </div>
       </header>
 
-      {/* Main Content & Footer Conditional Render */}
-      {tvMode ? (
-        <TvDashboard
-          metrics={metrics}
-          project={projects.find(p => p.id === projectId)}
-        />
-      ) : (
-        <>
-          <main className="app-main">
-            {loading && !metrics ? (
-              <div className="loading-container">
-                <RefreshCw size={48} className="spinner" />
-                <p>Chargement des métriques ISTQB...</p>
+      {/* Main Content */}
+      <main className="app-main">
+        {loading && !metrics ? (
+          <div className="loading-container">
+            <RefreshCw size={48} className="spinner" />
+            <p>Chargement des métriques ISTQB...</p>
+          </div>
+        ) : useDashboard2 ? (
+          <TvDashboard
+            metrics={metrics}
+            project={projects.find(p => p.id === projectId)}
+            isDark={darkMode}
+            useBusiness={useBusinessTerms}
+          />
+        ) : (
+          <>
+            {/* Métriques ISTQB */}
+            <section className="section">
+              <MetricsCards metrics={metrics} useBusiness={useBusinessTerms} />
+            </section>
+
+            {/* Graphiques */}
+            <section className="section charts-section">
+              <div className="chart-container">
+                <StatusChart metrics={metrics} chartType="doughnut" useBusiness={useBusinessTerms} />
               </div>
-            ) : (
-              <>
-                {/* Métriques ISTQB */}
-                <section className="section">
-                  <MetricsCards metrics={metrics} />
-                </section>
+              <div className="chart-container">
+                <StatusChart metrics={metrics} chartType="bar" useBusiness={useBusinessTerms} />
+              </div>
+            </section>
 
-                {/* Graphiques */}
-                <section className="section charts-section">
-                  <div className="chart-container">
-                    <StatusChart metrics={metrics} chartType="doughnut" />
-                  </div>
-                  <div className="chart-container">
-                    <StatusChart metrics={metrics} chartType="bar" />
-                  </div>
-                </section>
+            {/* Liste des runs */}
+            <section className="section">
+              <RunsList metrics={metrics} useBusiness={useBusinessTerms} />
+            </section>
+          </>
+        )}
+      </main>
 
-                {/* Liste des runs */}
-                <section className="section">
-                  <RunsList metrics={metrics} />
-                </section>
-              </>
-            )}
-          </main>
-
-          {/* Footer */}
-          <footer className="app-footer">
-            <div className="footer-content">
-              <span>© 2026 Neo-Logix | QA Dashboard by Matou</span>
-              {lastUpdate && (
-                <span className="last-update">
-                  Dernière mise à jour: {lastUpdate.toLocaleTimeString('fr-FR')}
-                </span>
-              )}
-              <span>Standards: ISTQB | LEAN | ITIL</span>
-            </div>
-          </footer>
-        </>
-      )}
+      {/* Footer */}
+      <footer className="app-footer">
+        <div className="footer-content">
+          <span>© 2026 Neo-Logix | QA Dashboard by Matou</span>
+          {lastUpdate && (
+            <span className="last-update">
+              Dernière mise à jour: {lastUpdate.toLocaleTimeString('fr-FR')}
+            </span>
+          )}
+          <span>Standards: ISTQB | LEAN | ITIL</span>
+        </div>
+      </footer>
     </div>
   );
 }

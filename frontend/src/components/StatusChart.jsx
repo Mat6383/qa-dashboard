@@ -35,7 +35,7 @@ ChartJS.register(
   Legend
 );
 
-const StatusChart = ({ metrics, chartType = 'doughnut' }) => {
+const StatusChart = ({ metrics, chartType = 'doughnut', useBusiness }) => {
   if (!metrics || !metrics.statusDistribution) {
     return <div className="chart-loading">Chargement des graphiques...</div>;
   }
@@ -75,7 +75,7 @@ const StatusChart = ({ metrics, chartType = 'doughnut' }) => {
       },
       tooltip: {
         callbacks: {
-          label: function(context) {
+          label: function (context) {
             const label = context.label || '';
             const value = context.parsed || 0;
             const total = context.dataset.data.reduce((a, b) => a + b, 0);
@@ -86,7 +86,7 @@ const StatusChart = ({ metrics, chartType = 'doughnut' }) => {
       },
       title: {
         display: true,
-        text: 'Distribution des Statuts de Tests',
+        text: useBusiness ? 'Distribution des Statuts de Tests' : 'Distribution des Statuts de Tests',
         font: {
           size: 16,
           weight: 'bold'
@@ -122,7 +122,7 @@ const StatusChart = ({ metrics, chartType = 'doughnut' }) => {
       },
       tooltip: {
         callbacks: {
-          label: function(context) {
+          label: function (context) {
             const value = context.parsed.y || 0;
             const total = context.dataset.data.reduce((a, b) => a + b, 0);
             const percentage = ((value / total) * 100).toFixed(1);
@@ -132,7 +132,7 @@ const StatusChart = ({ metrics, chartType = 'doughnut' }) => {
       },
       title: {
         display: true,
-        text: 'Répartition par Statut',
+        text: useBusiness ? 'Répartition par Statut' : 'Répartition par Statut',
         font: {
           size: 16,
           weight: 'bold'
@@ -161,7 +161,7 @@ const StatusChart = ({ metrics, chartType = 'doughnut' }) => {
 
       {/* Statistiques détaillées */}
       <div className="status-details">
-        <h4>Détails par Statut</h4>
+        <h4>{useBusiness ? 'Détails par Statut' : 'Détails par Statut'}</h4>
         <div className="status-list">
           {labels.map((label, index) => (
             <StatusItem
@@ -183,13 +183,13 @@ const StatusChart = ({ metrics, chartType = 'doughnut' }) => {
  */
 const StatusItem = ({ label, value, color, total }) => {
   const percentage = ((value / total) * 100).toFixed(1);
-  
+
   return (
     <div className="status-item">
       <div className="status-header">
         <div className="status-label">
-          <span 
-            className="status-indicator" 
+          <span
+            className="status-indicator"
             style={{ backgroundColor: color }}
           />
           <span className="label-text">{label}</span>
@@ -197,11 +197,11 @@ const StatusItem = ({ label, value, color, total }) => {
         <span className="status-value">{value}</span>
       </div>
       <div className="status-bar">
-        <div 
-          className="status-bar-fill" 
-          style={{ 
+        <div
+          className="status-bar-fill"
+          style={{
             width: `${percentage}%`,
-            backgroundColor: color 
+            backgroundColor: color
           }}
         />
       </div>

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Settings, BarChart2, Shield, AlertTriangle, PlayCircle, CheckCircle2, XCircle, Clock, RefreshCw, CircleDashed, RotateCcw } from 'lucide-react';
 import '../styles/TvDashboard.css';
 
-const TvDashboard = ({ metrics, project }) => {
+const TvDashboard = ({ metrics, project, isDark, useBusiness }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
 
     useEffect(() => {
@@ -21,7 +21,7 @@ const TvDashboard = ({ metrics, project }) => {
     const globalStateText = isCritical ? 'CRITIQUE' : (isWarning ? 'ATTENTION' : 'OK');
 
     return (
-        <div className="tv-dashboard">
+        <div className={`tv-dashboard ${isDark ? 'tv-dark-theme' : ''}`}>
             {/* Top Header */}
             <div className="tv-header-info">
                 <span style={{ color: '#60A5FA', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -79,21 +79,21 @@ const TvDashboard = ({ metrics, project }) => {
                     <div className="kpi-section-title"><BarChart2 size={16} /> ISTQB</div>
                     <div className="kpi-grid">
                         <div className="kpi-card">
-                            <div className="kpi-card-title">ISTQB<br />Avg Pass Rate</div>
+                            <div className="kpi-card-title">ISTQB<br />{useBusiness ? 'Taux Succès Moy.' : 'Avg Pass Rate'}</div>
                             <div className={`kpi-card-value ${(metrics.istqb?.avgPassRate >= metrics.istqb?.passRateTarget) ? 'success' : 'danger'}`}>
                                 {metrics.istqb?.avgPassRate}%
                             </div>
                             <div className="kpi-card-target">≥ {metrics.istqb?.passRateTarget}%</div>
                         </div>
                         <div className="kpi-card">
-                            <div className="kpi-card-title">ISTQB<br />Milestones</div>
+                            <div className="kpi-card-title">ISTQB<br />{useBusiness ? 'Jalons' : 'Milestones'}</div>
                             <div className="kpi-card-value warning">
                                 {metrics.istqb?.milestonesCompleted}/{metrics.istqb?.milestonesTotal}
                             </div>
                             <div className="kpi-card-target">{Math.round((metrics.istqb?.milestonesCompleted / metrics.istqb?.milestonesTotal) * 100)}%</div>
                         </div>
                         <div className="kpi-card">
-                            <div className="kpi-card-title">ISTQB<br />Block Rate</div>
+                            <div className="kpi-card-title">ISTQB<br />{useBusiness ? 'Taux de Blocage' : 'Block Rate'}</div>
                             <div className={`kpi-card-value ${(metrics.istqb?.blockRate <= metrics.istqb?.blockRateTarget) ? 'success' : 'warning'}`}>
                                 {metrics.istqb?.blockRate}%
                             </div>
@@ -107,21 +107,21 @@ const TvDashboard = ({ metrics, project }) => {
                     <div className="kpi-section-title"><Settings size={16} /> ITIL</div>
                     <div className="kpi-grid">
                         <div className="kpi-card">
-                            <div className="kpi-card-title">ITIL<br />MTTR Moyen</div>
+                            <div className="kpi-card-title">ITIL<br />{useBusiness ? 'Temps Moyen Résolution' : 'MTTR Moyen'}</div>
                             <div className={`kpi-card-value ${(metrics.itil?.mttr <= metrics.itil?.mttrTarget) ? 'info' : 'danger'}`}>
                                 {metrics.itil?.mttr}h
                             </div>
                             <div className="kpi-card-target">≤ {metrics.itil?.mttrTarget}h</div>
                         </div>
                         <div className="kpi-card">
-                            <div className="kpi-card-title">ITIL<br />Lead Time</div>
+                            <div className="kpi-card-title">ITIL<br />{useBusiness ? 'Délai Livraison' : 'Lead Time'}</div>
                             <div className={`kpi-card-value ${(metrics.itil?.leadTime <= metrics.itil?.leadTimeTarget) ? 'info' : 'danger'}`}>
                                 {metrics.itil?.leadTime}h
                             </div>
                             <div className="kpi-card-target">≤ {metrics.itil?.leadTimeTarget}h</div>
                         </div>
                         <div className="kpi-card">
-                            <div className="kpi-card-title">ITIL<br />Change Fail Rate</div>
+                            <div className="kpi-card-title">ITIL<br />{useBusiness ? 'Taux Échec Changement' : 'Change Fail Rate'}</div>
                             <div className={`kpi-card-value ${(metrics.itil?.changeFailRate <= metrics.itil?.changeFailRateTarget) ? 'success' : 'danger'}`}>
                                 {metrics.itil?.changeFailRate}%
                             </div>
@@ -135,21 +135,21 @@ const TvDashboard = ({ metrics, project }) => {
                     <div className="kpi-section-title"><RefreshCw size={16} /> LEAN</div>
                     <div className="kpi-grid">
                         <div className="kpi-card">
-                            <div className="kpi-card-title">LEAN<br />WIP Total</div>
+                            <div className="kpi-card-title">LEAN<br />{useBusiness ? 'En-cours (WIP)' : 'WIP Total'}</div>
                             <div className={`kpi-card-value ${(metrics.lean?.wipTotal <= metrics.lean?.wipTarget) ? 'success' : 'warning'}`}>
                                 {metrics.lean?.wipTotal}
                             </div>
                             <div className="kpi-card-target">≤ {metrics.lean?.wipTarget}</div>
                         </div>
                         <div className="kpi-card">
-                            <div className="kpi-card-title">LEAN<br />Runs Actifs</div>
+                            <div className="kpi-card-title">LEAN<br />{useBusiness ? 'Campagnes Actives' : 'Runs Actifs'}</div>
                             <div className="kpi-card-value success">
                                 {metrics.lean?.activeRuns}
                             </div>
                             <div className="kpi-card-target">En cours</div>
                         </div>
                         <div className="kpi-card">
-                            <div className="kpi-card-title">LEAN<br />Runs Fermés</div>
+                            <div className="kpi-card-title">LEAN<br />{useBusiness ? 'Campagnes Clôturées' : 'Runs Fermés'}</div>
                             <div className="kpi-card-value info">
                                 {metrics.lean?.closedRuns}
                             </div>
@@ -160,7 +160,7 @@ const TvDashboard = ({ metrics, project }) => {
 
                 {/* Runs List TV Style */}
                 <div className="tv-runs-list">
-                    <h3><RefreshCw size={16} /> Runs Actifs ({metrics.runs?.length})</h3>
+                    <h3><RefreshCw size={16} /> {useBusiness ? 'Campagnes Actives' : 'Runs Actifs'} ({metrics.runs?.length})</h3>
 
                     {metrics.runs && metrics.runs.map((run) => (
                         <div className="tv-run-card" key={run.id}>
