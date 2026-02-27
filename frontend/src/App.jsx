@@ -42,7 +42,7 @@ function App() {
   const [tvMode, setTvMode] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
   const [useDashboard2, setUseDashboard2] = useState(false);
-  const [useBusinessTerms, setUseBusinessTerms] = useState(false);
+  const [useBusinessTerms, setUseBusinessTerms] = useState(true);
   const [backendStatus, setBackendStatus] = useState('checking');
 
   /**

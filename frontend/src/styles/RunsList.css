@@ -197,8 +197,29 @@
 }
 
 /* Responsive */
+@media (min-width: 1920px) {
+  .runs-grid {
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+  }
+}
+
 @media (max-width: 768px) {
   .runs-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .runs-list-container {
+    padding: 1rem;
+  }
+
+  .run-card {
+    padding: 1rem;
+  }
+
+  .run-card-header {
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }
