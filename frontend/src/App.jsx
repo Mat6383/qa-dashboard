@@ -20,6 +20,7 @@ import StatusChart from './components/StatusChart';
 import RunsList from './components/RunsList';
 import TvDashboard from './components/TvDashboard';
 import Dashboard3 from './components/Dashboard3';
+import Dashboard4 from './components/Dashboard4';
 import {
   RefreshCw,
   AlertCircle,
@@ -248,6 +249,7 @@ function App() {
               <option value="1">Dashboard 1 (Standard)</option>
               <option value="2">Dashboard 2 (TV)</option>
               <option value="3">Dashboard 3 (Quality Rates)</option>
+              <option value="4">Dashboard 4 (Vue Globale & PDF)</option>
             </select>
           </div>
 
@@ -314,6 +316,13 @@ function App() {
           />
         ) : dashboardView === '3' ? (
           <Dashboard3
+            metrics={metrics}
+            project={projects.find(p => p.id === projectId)}
+            isDark={darkMode}
+            useBusiness={useBusinessTerms}
+          />
+        ) : dashboardView === '4' ? (
+          <Dashboard4
             metrics={metrics}
             project={projects.find(p => p.id === projectId)}
             isDark={darkMode}
