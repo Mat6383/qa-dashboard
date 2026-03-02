@@ -57,22 +57,24 @@ const TvDashboard = ({ metrics, project, isDark, useBusiness }) => {
 
             {/* Main Project Card */}
             <div className="tv-project-card">
-                <div className="project-header">
-                    <div className="project-subtitle">
-                        🏆 PROJET PRINCIPAL
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                    <div className="project-header" style={{ marginBottom: 0 }}>
+                        <div className="project-subtitle">
+                            🏆 PROJET PRINCIPAL
+                        </div>
+                        <h2 className="project-title">{project?.name || 'Neo-Pilot'}</h2>
+                        <div className="project-tags">
+                            {metrics.lean?.activeRuns} actifs • 163 total • {metrics.istqb?.milestonesCompleted}/{metrics.istqb?.milestonesTotal} milestones
+                        </div>
                     </div>
-                    <h2 className="project-title">{project?.name || 'Neo-Pilot'}</h2>
-                    <div className="project-tags">
-                        {metrics.lean?.activeRuns} actifs • 163 total • {metrics.istqb?.milestonesCompleted}/{metrics.istqb?.milestonesTotal} milestones
-                    </div>
-                </div>
 
-                {(isWarning || isCritical) && (
-                    <div className="tv-vigilance">
-                        <h4><AlertTriangle size={16} /> ATTENTION</h4>
-                        <p>Points de vigilance detectés sur les KPIs en dessous des objectifs.</p>
-                    </div>
-                )}
+                    {(isWarning || isCritical) && (
+                        <div className="tv-vigilance">
+                            <h4><AlertTriangle size={16} /> ATTENTION</h4>
+                            <p>Points de vigilance detectés sur les KPIs en dessous des objectifs.</p>
+                        </div>
+                    )}
+                </div>
 
                 {/* ISTQB Section */}
                 <div className="kpi-section">

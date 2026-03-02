@@ -210,11 +210,11 @@
   background-color: rgba(180, 83, 9, 0.1);
   border: 1px solid #B45309;
   border-radius: 0.5rem;
-  padding: 1rem;
+  padding: 0.5rem 1rem;
   display: inline-flex;
-  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
   color: #D97706;
-  margin-bottom: 2rem;
 }
 
 .tv-dashboard.tv-dark-theme .tv-vigilance {
@@ -226,12 +226,15 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 1rem;
-  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  margin: 0;
 }
 
 .tv-vigilance p {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  margin: 0;
+  max-width: 250px;
+  line-height: 1.2;
 }
 
 .kpi-section {
