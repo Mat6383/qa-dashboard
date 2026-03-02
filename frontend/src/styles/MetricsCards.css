@@ -104,8 +104,8 @@
 
 /* Alertes SLA */
 .sla-alerts {
-  background: #FEF3C7;
-  border: 2px solid #F59E0B;
+  background: var(--sla-bg, #FEF3C7);
+  border: 2px solid var(--sla-border, #F59E0B);
   border-radius: 0.75rem;
   padding: 1rem;
   display: flex;
@@ -113,6 +113,11 @@
   gap: 0.5rem;
   animation: pulse 2s ease-in-out infinite;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.dark-theme .sla-alerts {
+  --sla-bg: rgba(245, 158, 11, 0.1);
+  --sla-border: #D97706;
 }
 
 @keyframes pulse {
@@ -128,16 +133,24 @@
 }
 
 .alert-icon {
-  color: #F59E0B;
+  color: var(--sla-icon, #F59E0B);
   flex-shrink: 0;
   align-self: flex-start;
+}
+
+.dark-theme .alert-icon {
+  --sla-icon: #FBBF24;
 }
 
 .alerts-content h3 {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #78350F;
+  color: var(--sla-title, #78350F);
   margin-bottom: 0.5rem;
+}
+
+.dark-theme .alerts-content h3 {
+  --sla-title: #FBBF24;
 }
 
 .alert {
@@ -147,6 +160,7 @@
   border-radius: 0.5rem;
   margin-bottom: 0.25rem;
   border-left: 3px solid;
+  color: var(--text-color);
 }
 
 .alert:last-child {
@@ -155,12 +169,10 @@
 
 .alert-warning {
   border-color: #F59E0B;
-  color: #92400E;
 }
 
 .alert-critical {
   border-color: #EF4444;
-  color: #991B1B;
 }
 
 /* Loading state */

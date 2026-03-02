@@ -218,8 +218,9 @@
 }
 
 .tv-dashboard.tv-dark-theme .tv-vigilance {
-  background-color: rgba(180, 83, 9, 0.2);
-  color: #FCD34D;
+  background-color: rgba(245, 158, 11, 0.1);
+  border-color: #D97706;
+  color: #FBBF24;
 }
 
 .tv-vigilance h4 {
