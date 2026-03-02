@@ -19,6 +19,7 @@ import MetricsCards from './components/MetricsCards';
 import StatusChart from './components/StatusChart';
 import RunsList from './components/RunsList';
 import TvDashboard from './components/TvDashboard';
+import Dashboard3 from './components/Dashboard3';
 import {
   RefreshCw,
   AlertCircle,
@@ -41,7 +42,7 @@ function App() {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [tvMode, setTvMode] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
-  const [useDashboard2, setUseDashboard2] = useState(false);
+  const [dashboardView, setDashboardView] = useState('1'); // '1'=Standard, '2'=TV Dashboard, '3'=Quality Rates
   const [useBusinessTerms, setUseBusinessTerms] = useState(true);
   const [backendStatus, setBackendStatus] = useState('checking');
 
@@ -81,13 +82,19 @@ function App() {
       setLoading(true);
       setError(null);
 
-      const response = await apiService.getDashboardMetrics(projectId);
+      const [metricsResponse, qualityResponse] = await Promise.all([
+        apiService.getDashboardMetrics(projectId),
+        fetch(`http://localhost:3001/api/dashboard/${projectId}/quality-rates`).then(res => res.json()).catch(() => ({ success: false }))
+      ]);
 
-      if (response.success) {
-        setMetrics(response.data);
+      if (metricsResponse.success) {
+        setMetrics({
+          ...metricsResponse.data,
+          qualityRates: qualityResponse.success ? qualityResponse.data : null
+        });
         setLastUpdate(new Date());
       } else {
-        throw new Error(response.error || 'Erreur inconnue');
+        throw new Error(metricsResponse.error || 'Erreur inconnue');
       }
 
     } catch (err) {
@@ -230,17 +237,18 @@ function App() {
             </label>
           </div>
 
-          {/* Toggle Dashboard 2 Switch */}
-          <div className="switch-container" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px', marginRight: '8px' }}>
-            <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-color)' }}>Dashboard 2</span>
-            <label className="theme-switch">
-              <input
-                type="checkbox"
-                checked={useDashboard2}
-                onChange={() => setUseDashboard2(!useDashboard2)}
-              />
-              <span className="slider round"></span>
-            </label>
+          {/* Sélecteur de Dashboard */}
+          <div style={{ marginLeft: '8px', marginRight: '8px' }}>
+            <select
+              value={dashboardView}
+              onChange={(e) => setDashboardView(e.target.value)}
+              className="project-selector"
+              style={{ backgroundColor: 'var(--card-bg)', color: 'var(--text-color)', border: '1px solid var(--border-color)' }}
+            >
+              <option value="1">Dashboard 1 (Standard)</option>
+              <option value="2">Dashboard 2 (TV)</option>
+              <option value="3">Dashboard 3 (Quality Rates)</option>
+            </select>
           </div>
 
           {/* Toggle Vocabulaire Métier Switch */}
@@ -297,8 +305,15 @@ function App() {
             <RefreshCw size={48} className="spinner" />
             <p>Chargement des métriques ISTQB...</p>
           </div>
-        ) : useDashboard2 ? (
+        ) : dashboardView === '2' ? (
           <TvDashboard
+            metrics={metrics}
+            project={projects.find(p => p.id === projectId)}
+            isDark={darkMode}
+            useBusiness={useBusinessTerms}
+          />
+        ) : dashboardView === '3' ? (
+          <Dashboard3
             metrics={metrics}
             project={projects.find(p => p.id === projectId)}
             isDark={darkMode}

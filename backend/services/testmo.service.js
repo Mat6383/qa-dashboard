@@ -341,6 +341,128 @@ class TestmoService {
   }
 
   /**
+   * Calcule le Taux d'Échappement et le Taux de Détection
+   * ISTQB: Escape Rate & Defect Detection Percentage (DDP)
+   */
+  async getEscapeAndDetectionRates(projectId) {
+    try {
+      // 1. Récupérer les milestones actives (non complétées)
+      const milestonesResponse = await this.client.get(`/projects/${projectId}/milestones`, {
+        params: { is_completed: 0, sort: 'milestones:created_at', order: 'desc', per_page: 100 }
+      });
+      const activeMilestones = milestonesResponse.data.result || [];
+
+      if (activeMilestones.length < 3) {
+        return {
+          escapeRate: 0,
+          detectionRate: 0,
+          bugsInProd: 0,
+          bugsInTest: 0,
+          preprodMilestone: activeMilestones[0] ? activeMilestones[0].name : 'N/A',
+          prodMilestone: activeMilestones[2] ? activeMilestones[2].name : 'N/A',
+          message: 'Pas assez de milestones actives pour comparer (3 requises).'
+        };
+      }
+
+      // Parcourir pour trouver les 3 premières avec des runs
+      let preprodMilestone = null;
+      let prodMilestone = null;
+      let preprodRuns = [];
+      let prodRuns = [];
+      let milestonesWithRunsCount = 0;
+
+      for (const m of activeMilestones) {
+        const runsResponse = await this.client.get(`/projects/${projectId}/runs`, {
+          params: { milestone_id: m.id, per_page: 100 }
+        });
+        const runs = runsResponse.data.result || [];
+        if (runs.length > 0) {
+          milestonesWithRunsCount++;
+          if (milestonesWithRunsCount === 1) {
+            preprodMilestone = m;
+            preprodRuns = runs;
+          } else if (milestonesWithRunsCount === 3) {
+            prodMilestone = m;
+            prodRuns = runs;
+            break; // On a trouvé la 3ème (avant-avant-dernière)
+          }
+        }
+      }
+
+      if (!preprodMilestone || !prodMilestone) {
+        return {
+          escapeRate: 0,
+          detectionRate: 0,
+          bugsInProd: 0,
+          bugsInTest: 0,
+          preprodMilestone: preprodMilestone ? preprodMilestone.name : 'N/A',
+          prodMilestone: prodMilestone ? prodMilestone.name : 'N/A',
+          message: 'Impossible de trouver 3 milestones avec des runs.'
+        };
+      }
+
+      // 2. Bugs en TEST = somme des tests failed (status_id=2) dans les autres runs de la PROD (sans "patch" ni "retour")
+      let bugsInTest = 0;
+      const testRuns = prodRuns.filter(r =>
+        !r.name.toLowerCase().includes('patch') &&
+        !r.name.toLowerCase().includes('retour')
+      );
+
+      for (const run of testRuns) {
+        bugsInTest += (run.status2_count || 0);
+      }
+
+      // 3. Bugs en PROD = somme des issues dans les runs contenant "patch" ou "retour"
+      let bugsInProd = 0;
+      const patchRuns = prodRuns.filter(r =>
+        r.name.toLowerCase().includes('patch') ||
+        r.name.toLowerCase().includes('retour')
+      );
+
+      for (const run of patchRuns) {
+        // En Testmo, les issues remises au niveau du run sont dispos dans run.issues
+        // On récupère le détail du run avec expands=issues
+        const runDetails = await this.getRunDetails(run.id);
+        if (runDetails.issues && runDetails.issues.length > 0) {
+          bugsInProd += runDetails.issues.length;
+        } else {
+          // Si on veut être sûr, on compte au moins le nom de runs de patch s'il n'y a pas d'issues explicitement liées
+          // Car l'utilisateur dit : "le nombre de tickets dans le run pour connaitre le nombre de retour de prod"
+          // Par sécurité, s'il n'y a pas d'issues remontées dans `issues`, on consulte les résultats
+          const results = await this.client.get(`/runs/${run.id}/results`, { params: { expands: 'issues' } });
+          const failedResultsWithIssues = results.data.result.filter(res => res.issues && res.issues.length > 0);
+
+          if (failedResultsWithIssues.length > 0) {
+            bugsInProd += failedResultsWithIssues.length;
+          } else if (runDetails.status2_count > 0) {
+            // Alternative: Si pas d'issues liées API, on utilise les failures dans les patchs ?
+            // Je vais m'appuyer prioritairement sur les issues. Si 0 issues et pas trouvé, on met 0.
+            // Vu l'exigence : "le nombre de tickets dans le run". En Testmo les tickets = issues liés.
+          }
+        }
+      }
+
+      const totalBugs = bugsInTest + bugsInProd;
+
+      const escapeRate = totalBugs > 0 ? this._calculatePercentage(bugsInProd, totalBugs) : 0;
+      const detectionRate = totalBugs > 0 ? this._calculatePercentage(bugsInTest, totalBugs) : 0;
+
+      return {
+        escapeRate,
+        detectionRate,
+        bugsInProd,
+        bugsInTest,
+        totalBugs,
+        preprodMilestone: preprodMilestone.name,
+        prodMilestone: prodMilestone.name
+      };
+
+    } catch (error) {
+      throw this._handleError('getEscapeAndDetectionRates', error);
+    }
+  }
+
+  /**
    * Calcule un pourcentage avec 2 décimales
    * @private
    */

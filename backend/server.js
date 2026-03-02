@@ -83,13 +83,13 @@ app.get('/api/health', (req, res) => {
 app.get('/api/projects', async (req, res) => {
   try {
     const projects = await testmoService.getProjects();
-    
+
     res.json({
       success: true,
       data: projects,
       timestamp: new Date().toISOString()
     });
-    
+
   } catch (error) {
     logger.error('Erreur GET /api/projects:', error);
     res.status(500).json({
@@ -108,17 +108,17 @@ app.get('/api/projects', async (req, res) => {
 app.get('/api/dashboard/:projectId', async (req, res) => {
   try {
     const projectId = parseInt(req.params.projectId);
-    
+
     if (isNaN(projectId)) {
       return res.status(400).json({
         success: false,
         error: 'Project ID invalide'
       });
     }
-    
+
     logger.info(`Récupération métriques pour projet ${projectId}`);
     const metrics = await testmoService.getProjectMetrics(projectId);
-    
+
     // Log des alertes SLA (ITIL)
     if (!metrics.slaStatus.ok) {
       logger.warn('Alertes SLA détectées:', {
@@ -126,15 +126,49 @@ app.get('/api/dashboard/:projectId', async (req, res) => {
         alerts: metrics.slaStatus.alerts
       });
     }
-    
+
     res.json({
       success: true,
       data: metrics,
       timestamp: new Date().toISOString()
     });
-    
+
   } catch (error) {
     logger.error(`Erreur GET /api/dashboard/${req.params.projectId}:`, error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+/**
+ * Taux d'échappement et de détection
+ * Endpoint pour le Dashboard 3
+ */
+app.get('/api/dashboard/:projectId/quality-rates', async (req, res) => {
+  try {
+    const projectId = parseInt(req.params.projectId);
+
+    if (isNaN(projectId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Project ID invalide'
+      });
+    }
+
+    logger.info(`Récupération Quality Rates pour projet ${projectId}`);
+    const rates = await testmoService.getEscapeAndDetectionRates(projectId);
+
+    res.json({
+      success: true,
+      data: rates,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    logger.error(`Erreur GET /api/dashboard/${req.params.projectId}/quality-rates:`, error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -151,22 +185,22 @@ app.get('/api/projects/:projectId/runs', async (req, res) => {
   try {
     const projectId = parseInt(req.params.projectId);
     const activeOnly = req.query.active !== 'false'; // Par défaut: actifs seulement
-    
+
     if (isNaN(projectId)) {
       return res.status(400).json({
         success: false,
         error: 'Project ID invalide'
       });
     }
-    
+
     const runs = await testmoService.getProjectRuns(projectId, activeOnly);
-    
+
     res.json({
       success: true,
       data: runs,
       timestamp: new Date().toISOString()
     });
-    
+
   } catch (error) {
     logger.error(`Erreur GET /api/projects/${req.params.projectId}/runs:`, error);
     res.status(500).json({
@@ -184,22 +218,22 @@ app.get('/api/projects/:projectId/runs', async (req, res) => {
 app.get('/api/runs/:runId', async (req, res) => {
   try {
     const runId = parseInt(req.params.runId);
-    
+
     if (isNaN(runId)) {
       return res.status(400).json({
         success: false,
         error: 'Run ID invalide'
       });
     }
-    
+
     const runDetails = await testmoService.getRunDetails(runId);
-    
+
     res.json({
       success: true,
       data: runDetails,
       timestamp: new Date().toISOString()
     });
-    
+
   } catch (error) {
     logger.error(`Erreur GET /api/runs/${req.params.runId}:`, error);
     res.status(500).json({
@@ -218,22 +252,22 @@ app.get('/api/runs/:runId/results', async (req, res) => {
   try {
     const runId = parseInt(req.params.runId);
     const statusFilter = req.query.status; // Ex: '3,5' pour Failed+Blocked
-    
+
     if (isNaN(runId)) {
       return res.status(400).json({
         success: false,
         error: 'Run ID invalide'
       });
     }
-    
+
     const results = await testmoService.getRunResults(runId, statusFilter);
-    
+
     res.json({
       success: true,
       data: results,
       timestamp: new Date().toISOString()
     });
-    
+
   } catch (error) {
     logger.error(`Erreur GET /api/runs/${req.params.runId}/results:`, error);
     res.status(500).json({
@@ -251,22 +285,22 @@ app.get('/api/runs/:runId/results', async (req, res) => {
 app.get('/api/projects/:projectId/automation', async (req, res) => {
   try {
     const projectId = parseInt(req.params.projectId);
-    
+
     if (isNaN(projectId)) {
       return res.status(400).json({
         success: false,
         error: 'Project ID invalide'
       });
     }
-    
+
     const automationRuns = await testmoService.getAutomationRuns(projectId);
-    
+
     res.json({
       success: true,
       data: automationRuns,
       timestamp: new Date().toISOString()
     });
-    
+
   } catch (error) {
     logger.error(`Erreur GET /api/projects/${req.params.projectId}/automation:`, error);
     res.status(500).json({
@@ -285,13 +319,13 @@ app.post('/api/cache/clear', (req, res) => {
   try {
     testmoService.clearCache();
     logger.info('Cache cleared manually');
-    
+
     res.json({
       success: true,
       message: 'Cache cleared successfully',
       timestamp: new Date().toISOString()
     });
-    
+
   } catch (error) {
     logger.error('Erreur POST /api/cache/clear:', error);
     res.status(500).json({
@@ -323,11 +357,11 @@ app.use((err, req, res, next) => {
     path: req.path,
     method: req.method
   });
-  
+
   res.status(err.status || 500).json({
     success: false,
-    error: process.env.NODE_ENV === 'production' 
-      ? 'Erreur interne du serveur' 
+    error: process.env.NODE_ENV === 'production'
+      ? 'Erreur interne du serveur'
       : err.message,
     timestamp: new Date().toISOString()
   });
@@ -350,7 +384,7 @@ app.listen(PORT, () => {
 ║  Author: Matou - Neo-Logix QA Lead            ║
 ╚════════════════════════════════════════════════╝
   `);
-  
+
   logger.info('Server ready to accept connections');
 });
 
