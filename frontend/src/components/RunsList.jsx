@@ -31,7 +31,7 @@ const RunsList = ({ metrics, useBusiness }) => {
           <PlayCircle size={20} />
           {useBusiness ? 'Campagnes Actives' : 'Runs Actifs'} ({metrics.runsCount})
         </h3>
-        <span className="runs-subtitle">ISTQB: Test Execution Monitoring</span>
+        <span className="runs-subtitle">{useBusiness ? 'ISTQB : Suivi d\'exécution' : 'ISTQB: Test Execution Monitoring'}</span>
       </div>
 
       <div className="runs-grid">
@@ -71,7 +71,7 @@ const RunCard = ({ run, index, useBusiness }) => {
         <div className="metric">
           <span className="metric-label">
             <Clock size={14} />
-            Completion
+            {useBusiness ? 'Complétion' : 'Completion'}
           </span>
           <div className="metric-value">
             <span style={{ color: completionColor }}>{run.completionRate}%</span>
@@ -82,7 +82,7 @@ const RunCard = ({ run, index, useBusiness }) => {
         <div className="metric">
           <span className="metric-label">
             <CheckCircle2 size={14} />
-            Pass Rate
+            {useBusiness ? 'Taux de succès' : 'Pass Rate'}
           </span>
           <div className="metric-value">
             <span style={{ color: statusColor }}>{run.passRate}%</span>

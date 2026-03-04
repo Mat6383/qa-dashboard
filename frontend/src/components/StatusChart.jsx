@@ -86,7 +86,7 @@ const StatusChart = ({ metrics, chartType = 'doughnut', useBusiness }) => {
       },
       title: {
         display: true,
-        text: useBusiness ? 'Distribution des Statuts de Tests' : 'Distribution des Statuts de Tests',
+        text: useBusiness ? 'Distribution des Statuts de Tests' : 'Test Status Distribution',
         font: {
           size: 16,
           weight: 'bold'
@@ -132,7 +132,7 @@ const StatusChart = ({ metrics, chartType = 'doughnut', useBusiness }) => {
       },
       title: {
         display: true,
-        text: useBusiness ? 'Répartition par Statut' : 'Répartition par Statut',
+        text: useBusiness ? 'Répartition par Statut' : 'Status Distribution',
         font: {
           size: 16,
           weight: 'bold'
@@ -161,7 +161,7 @@ const StatusChart = ({ metrics, chartType = 'doughnut', useBusiness }) => {
 
       {/* Statistiques détaillées */}
       <div className="status-details">
-        <h4>{useBusiness ? 'Détails par Statut' : 'Détails par Statut'}</h4>
+        <h4>{useBusiness ? 'Détails par Statut' : 'Status Details'}</h4>
         <div className="status-list">
           {labels.map((label, index) => (
             <StatusItem

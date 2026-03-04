@@ -27,73 +27,67 @@ const MetricsCards = ({ metrics, useBusiness }) => {
     );
   }
 
+  const getAlertForMetric = (metricName) => {
+    if (!metrics.slaStatus || metrics.slaStatus.ok) return null;
+    return metrics.slaStatus.alerts.find(a => a.metric === metricName);
+  };
+
   const cards = [
     {
       title: useBusiness ? 'Taux d\'Exécution' : 'Completion Rate',
-      subtitle: 'ISTQB: Test Progress',
+      subtitle: useBusiness ? 'ISTQB : Progression des tests' : 'ISTQB: Test Progress',
       value: `${metrics.completionRate}%`,
       total: `${metrics.raw.completed} / ${metrics.raw.total}`,
       target: '≥ 90%',
       icon: Clock,
       color: getColorByThreshold(metrics.completionRate, 90, 80),
       trend: metrics.completionRate >= 90 ? 'up' : 'down',
-      description: 'Tests exécutés vs total'
+      description: useBusiness ? 'Tests exécutés vs total' : 'Tests executed vs total',
+      alert: getAlertForMetric('Completion Rate')
     },
     {
       title: useBusiness ? 'Taux de Succès' : 'Pass Rate',
-      subtitle: 'ISTQB: Test Quality',
+      subtitle: useBusiness ? 'ISTQB : Qualité des tests' : 'ISTQB: Test Quality',
       value: `${metrics.passRate}%`,
-      total: `${metrics.raw.passed} tests`,
+      total: `${metrics.raw.passed} ${useBusiness ? 'tests' : 'tests'}`,
       target: '≥ 95%',
       icon: CheckCircle2,
       color: getColorByThreshold(metrics.passRate, 95, 90),
       trend: metrics.passRate >= 95 ? 'up' : 'down',
-      description: 'Tests réussis vs exécutés'
+      description: useBusiness ? 'Tests réussis / (Réussis + Échoués + Bloqués + Ignorés)' : 'Passed / Completed (Passed + Failed + Blocked + Skipped)',
+      alert: getAlertForMetric('Pass Rate') || getAlertForMetric('Blocked Rate') // On affiche l'alerte de blocage ici aussi s'il n'y a pas d'alerte de succès
     },
     {
       title: useBusiness ? 'Taux d\'Échec' : 'Failure Rate',
-      subtitle: 'ISTQB: Defect Detection',
+      subtitle: useBusiness ? 'ISTQB : Détection des défauts' : 'ISTQB: Defect Detection',
       value: `${metrics.failureRate}%`,
-      total: `${metrics.raw.failed} défauts`,
+      total: `${metrics.raw.failed} ${useBusiness ? 'défauts' : 'defects'}`,
       target: '≤ 5%',
       icon: XCircle,
       color: getColorForFailure(metrics.failureRate),
       trend: metrics.failureRate > 5 ? 'down' : 'up',
-      description: 'Tests échoués détectés'
+      description: useBusiness ? 'Tests échoués détectés' : 'Failed tests detected',
+      alert: getAlertForMetric('Failure Rate')
     },
     {
       title: useBusiness ? 'Efficience des Tests' : 'Test Efficiency',
-      subtitle: 'LEAN: Efficacité QA',
+      subtitle: useBusiness ? 'LEAN : Efficacité QA' : 'LEAN: QA Efficiency',
       value: `${metrics.testEfficiency}%`,
       total: `${metrics.raw.passed + metrics.raw.failed} tests`,
       target: '≥ 95%',
       icon: TrendingUp,
       color: getColorByThreshold(metrics.testEfficiency, 95, 90),
       trend: metrics.testEfficiency >= 95 ? 'up' : 'down',
-      description: 'Ratio succès/échecs'
+      description: useBusiness ? 'Tests réussis / (Réussis + Échoués)' : 'Passed / (Passed + Failed)',
+      alert: getAlertForMetric('Test Efficiency')
     }
   ];
 
   return (
     <div className="metrics-container">
       {cards.map((card, index) => (
-        <MetricCard key={index} {...card} />
+        <MetricCard key={index} {...card} useBusiness={useBusiness} />
       ))}
-
-      {/* Alertes SLA ITIL */}
-      {metrics.slaStatus && !metrics.slaStatus.ok && (
-        <div className="sla-alerts">
-          <AlertTriangle className="alert-icon" />
-          <div className="alerts-content">
-            <h3>{useBusiness ? 'Seuils d\'Alerte SLA' : 'Alertes SLA ITIL'}</h3>
-            {metrics.slaStatus.alerts.map((alert, idx) => (
-              <div key={idx} className={`alert alert-${alert.severity}`}>
-                <strong>{alert.metric}:</strong> {alert.message}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
@@ -101,32 +95,53 @@ const MetricsCards = ({ metrics, useBusiness }) => {
 /**
  * Carte de métrique individuelle
  */
-const MetricCard = ({ title, subtitle, value, total, target, icon: Icon, color, trend, description }) => {
+const MetricCard = ({ title, subtitle, value, total, target, icon: Icon, color, trend, description, alert, useBusiness }) => {
   const TrendIcon = trend === 'up' ? TrendingUp : TrendingDown;
   const trendColor = trend === 'up' ? '#10B981' : '#EF4444';
 
   return (
-    <div className="metric-card" style={{ borderLeftColor: color }}>
+    <div className="metric-card" style={{ borderLeftColor: alert ? (alert.severity === 'warning' ? '#F59E0B' : '#EF4444') : color }}>
       <div className="card-header">
         <div className="card-title">
           <h3>{title}</h3>
-          <span className="subtitle">{subtitle}</span>
+          <span className="subtitle" style={{ fontSize: '0.9rem', opacity: 0.8 }}>{subtitle}</span>
         </div>
-        <div className="card-icon" style={{ backgroundColor: `${color}20` }}>
+        <div className="card-icon" style={{ backgroundColor: `${color}20`, padding: '10px', borderRadius: '50%' }}>
           <Icon size={24} color={color} />
         </div>
       </div>
 
-      <div className="card-body">
-        <div className="metric-value-row">
-          <div className="metric-value" style={{ color }}>{value}</div>
+      <div className="card-body" style={{ marginTop: '1rem' }}>
+        <div className="metric-value-row" style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+          <div className="metric-value" style={{ color, fontSize: '2.5rem', fontWeight: 800 }}>{value}</div>
+          <span style={{ fontSize: '1.2rem', color: trendColor }}>
+            {trend === 'up' ? '▲' : '▼'}
+          </span>
         </div>
-        <div className="metric-total">{total} {target && <span className="metric-target">| Objectif: {target}</span>}</div>
+        <div className="metric-total" style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.5rem' }}>
+          <span style={{ padding: '0.2rem 0.5rem', backgroundColor: `${color}15`, color, borderRadius: '4px', fontWeight: 600, fontSize: '0.85rem' }}>
+            {total}
+          </span>
+          {target && <span style={{ fontSize: '0.85rem', opacity: 0.7 }}>(Cible: {target})</span>}
+        </div>
       </div>
 
-      <div className="card-footer">
-        <span className="description">{description}</span>
-        <TrendIcon size={16} color={trendColor} />
+      <div className="card-footer" style={{ marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+        <span className="description" style={{ fontSize: '0.8rem', opacity: 0.6 }}>{description}</span>
+
+        {alert && (
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', padding: '0.75rem', backgroundColor: alert.severity === 'warning' ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)', borderRadius: '6px', color: alert.severity === 'warning' ? '#F59E0B' : '#EF4444' }}>
+            <AlertTriangle size={16} style={{ marginTop: '0.1rem', flexShrink: 0 }} />
+            <span style={{ fontSize: '0.8rem', fontWeight: 500, lineHeight: 1.4 }}>
+              {useBusiness ? (
+                alert.message.replace('Pass rate critique:', 'Critique :')
+                  .replace('Pass rate en warning:', 'Attention :')
+                  .replace('Trop de tests bloqués:', 'Blocages élevés :')
+                  .replace('Avancement insuffisant:', 'Retard :')
+              ) : alert.message}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

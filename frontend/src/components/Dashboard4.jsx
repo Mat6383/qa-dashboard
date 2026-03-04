@@ -1,13 +1,23 @@
 import React, { useRef } from 'react';
 import {
     ShieldAlert, ShieldCheck, Activity, Database, CheckCircle, Bug,
-    Download, Layers, CheckSquare, XCircle, BarChart3, TrendingUp
+    Download, Layers, CheckSquare, XCircle, BarChart3, TrendingUp, AlertTriangle
 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
-const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true }) => {
+const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setExportHandler }) => {
     const dashboardRef = useRef(null);
+
+    // Provide the export function to the parent component on mount
+    React.useEffect(() => {
+        if (setExportHandler) {
+            setExportHandler(() => handleExportPDF);
+        }
+        return () => {
+            if (setExportHandler) setExportHandler(null);
+        };
+    }, [setExportHandler]);
 
     if (!metrics || !project) {
         return (
@@ -28,6 +38,28 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true }) =>
 
     const escapeOk = rates.escapeRate < 5;
     const ddpOk = rates.detectionRate > 95;
+
+    const getAlertForMetric = (metricName) => {
+        if (!metrics.slaStatus || metrics.slaStatus.ok) return null;
+        return metrics.slaStatus.alerts.find(a => a.metric === metricName);
+    };
+
+    const renderAlert = (alert) => {
+        if (!alert) return null;
+        return (
+            <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'flex-start', gap: '0.5rem', padding: '0.75rem', backgroundColor: alert.severity === 'warning' ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)', borderRadius: '6px', color: alert.severity === 'warning' ? '#F59E0B' : '#EF4444' }}>
+                <AlertTriangle size={16} style={{ marginTop: '0.1rem', flexShrink: 0 }} />
+                <span style={{ fontSize: '0.85rem', fontWeight: 500, lineHeight: 1.4 }}>
+                    {useBusiness ? (
+                        alert.message.replace('Pass rate critique:', 'Critique :')
+                            .replace('Pass rate en warning:', 'Attention :')
+                            .replace('Trop de tests bloqués:', 'Blocages élevés :')
+                            .replace('Avancement insuffisant:', 'Retard :')
+                    ) : alert.message}
+                </span>
+            </div>
+        );
+    };
 
     const handleExportPDF = async () => {
         const element = dashboardRef.current;
@@ -62,205 +94,231 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true }) =>
     };
 
     return (
-        <div style={{ padding: '1rem', maxWidth: '1400px', margin: '0 auto' }}>
-            {/* Bouton d'export (Non visible dans le PDF car hors du conteneur #dashboard-export) */}
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-                <button
-                    onClick={handleExportPDF}
-                    style={{
-                        display: 'flex', alignItems: 'center', gap: '0.5rem',
-                        padding: '0.75rem 1.5rem', backgroundColor: '#3B82F6',
-                        color: 'white', border: 'none', borderRadius: '8px',
-                        fontWeight: 600, cursor: 'pointer', boxShadow: '0 4px 6px rgba(59, 130, 246, 0.3)',
-                        transition: 'all 0.2s ease'
-                    }}
-                    onMouseOver={(e) => e.target.style.backgroundColor = '#2563EB'}
-                    onMouseOut={(e) => e.target.style.backgroundColor = '#3B82F6'}
-                >
-                    <Download size={20} />
-                    Exporter en PDF
-                </button>
-            </div>
+        <div style={{ padding: '0.5rem', maxWidth: '1400px', margin: '0 auto' }}>
 
             {/* Conteneur principal à exporter en PDF */}
             <div
                 ref={dashboardRef}
                 className={`tv-dashboard ${isDark ? 'dark' : ''}`}
                 style={{
-                    padding: '2rem',
+                    padding: '0.75rem 1.5rem',
                     backgroundColor: 'var(--bg-color)',
                     borderRadius: '16px',
                     boxShadow: '0 4px 20px rgba(0,0,0,0.05)'
                 }}
             >
-                <header style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '2px solid var(--border-color)', paddingBottom: '1rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <Layers size={40} color="#3B82F6" />
-                        <div>
-                            <h1 style={{ margin: 0, fontSize: '1.8rem', color: 'var(--text-color)' }}>
-                                {useBusiness ? 'Bilan Qualité Global' : 'Global QA Dashboard'}
-                            </h1>
-                            <h2 style={{ margin: 0, opacity: 0.7, fontSize: '1rem', fontWeight: 500 }}>{project.name}</h2>
-                        </div>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '1.2rem', fontWeight: 600, color: 'var(--text-color)' }}>
-                            {new Date().toLocaleDateString('fr-FR')}
-                        </div>
-                        <div style={{ opacity: 0.6, fontSize: '0.9rem' }}>
-                            ISTQB / ITIL / LEAN Compliant
-                        </div>
-                    </div>
+                <header style={{ display: 'none' }}>
+                    {/* Ancien header masqué */}
                 </header>
 
-                {/* Grille principale (Responsive) */}
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', marginBottom: '2rem' }}>
-
-                    {/* Bloc 1: Taux d'Exécution */}
-                    <div className="metric-card" style={{ backgroundColor: 'var(--card-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, marginBottom: '1rem' }}>
-                            <Activity size={20} color="#3B82F6" />
-                            <span style={{ fontWeight: 600 }}>Taux d'Exécution</span>
-                        </div>
-                        <div style={{ fontSize: '3rem', fontWeight: 800, color: '#3B82F6' }}>
-                            {d1.completionRate}%
-                        </div>
-                        <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <span style={{ padding: '0.2rem 0.5rem', backgroundColor: 'rgba(59,130,246,0.1)', color: '#3B82F6', borderRadius: '4px', fontWeight: 600 }}>{d1.raw.completed} / {d1.raw.total}</span>
-                            <span style={{ opacity: 0.6 }}>tests exécutés</span>
-                        </div>
+                {/* --- SECTION PRÉPRODUCTION --- */}
+                <div style={{ marginBottom: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        <h2 style={{ fontSize: '1.1rem', color: 'var(--text-color)', margin: 0 }}>
+                            {useBusiness ? 'PRÉPRODUCTION' : 'PREPROD'}
+                        </h2>
+                        <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }}></div>
                     </div>
 
-                    {/* Bloc 2: Taux de Succès */}
-                    <div className="metric-card" style={{ backgroundColor: 'var(--card-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, marginBottom: '1rem' }}>
-                            <CheckSquare size={20} color="#10B981" />
-                            <span style={{ fontWeight: 600 }}>Taux de Succès</span>
-                        </div>
-                        <div style={{ fontSize: '3rem', fontWeight: 800, color: '#10B981' }}>
-                            {d1.passRate}%
-                        </div>
-                        <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <span style={{ padding: '0.2rem 0.5rem', backgroundColor: 'rgba(16,185,129,0.1)', color: '#10B981', borderRadius: '4px', fontWeight: 600 }}>{d1.raw.passed}</span>
-                            <span style={{ opacity: 0.6 }}>tests réussis</span>
-                        </div>
-                    </div>
+                    {/* Grille principale Preprod */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '0.75rem', marginBottom: '0.75rem' }}>
 
-                    {/* Bloc 3: Taux d'Échec */}
-                    <div className="metric-card" style={{ backgroundColor: 'var(--card-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, marginBottom: '1rem' }}>
-                            <XCircle size={20} color="#EF4444" />
-                            <span style={{ fontWeight: 600 }}>Taux d'Échec</span>
-                        </div>
-                        <div style={{ fontSize: '3rem', fontWeight: 800, color: '#EF4444' }}>
-                            {d1.failureRate}%
-                        </div>
-                        <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <span style={{ padding: '0.2rem 0.5rem', backgroundColor: 'rgba(239,68,68,0.1)', color: '#EF4444', borderRadius: '4px', fontWeight: 600 }}>{d1.raw.failed}</span>
-                            <span style={{ opacity: 0.6 }}>tests échoués</span>
-                        </div>
-                    </div>
-
-                    {/* Bloc 4: Efficience */}
-                    <div className="metric-card" style={{ backgroundColor: 'var(--card-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, marginBottom: '1rem' }}>
-                            <TrendingUp size={20} color="#8B5CF6" />
-                            <span style={{ fontWeight: 600 }}>Efficience des tests</span>
-                        </div>
-                        <div style={{ fontSize: '3rem', fontWeight: 800, color: '#8B5CF6' }}>
-                            {d1.testEfficiency}%
-                        </div>
-                        <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <span style={{ padding: '0.2rem 0.5rem', backgroundColor: 'rgba(139,92,246,0.1)', color: '#8B5CF6', borderRadius: '4px', fontWeight: 600 }}>Objectif</span>
-                            <span style={{ opacity: 0.6 }}>Approcher les 100%</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Ligne 2 : Qualité (Dashboard 3) */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem', marginBottom: '2rem' }}>
-                    {/* Escape Rate */}
-                    <div style={{ backgroundColor: 'var(--card-bg)', padding: '1.5rem', borderRadius: '12px', border: `2px solid ${escapeOk ? '#10B981' : '#EF4444'}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                            <h3 style={{ margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)' }}>
-                                <ShieldAlert size={20} /> Taux d'Échappement (PROD)
-                            </h3>
-                            <div style={{ fontSize: '0.9rem', opacity: 0.7 }}>Milestone: {rates.prodMilestone} | Objectif &lt; 5%</div>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: '2.5rem', fontWeight: 800, color: escapeOk ? '#10B981' : '#EF4444' }}>{rates.escapeRate}%</div>
-                            <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>{rates.bugsInProd} bugs prod</div>
-                        </div>
-                    </div>
-
-                    {/* Detection Rate */}
-                    <div style={{ backgroundColor: 'var(--card-bg)', padding: '1.5rem', borderRadius: '12px', border: `2px solid ${ddpOk ? '#10B981' : '#EF4444'}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div>
-                            <h3 style={{ margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)' }}>
-                                <ShieldCheck size={20} /> Taux de Détection (TEST)
-                            </h3>
-                            <div style={{ fontSize: '0.9rem', opacity: 0.7 }}>Lié: {rates.prodMilestone} | Objectif &gt; 95%</div>
-                        </div>
-                        <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: '2.5rem', fontWeight: 800, color: ddpOk ? '#10B981' : '#EF4444' }}>{rates.detectionRate}%</div>
-                            <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>{rates.bugsInTest} bugs test</div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Ligne 3: Distribution & Campagnes (simplifiées) */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '1.5rem' }}>
-
-                    <div style={{ backgroundColor: 'var(--card-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                        <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)' }}>
-                            <BarChart3 size={20} /> Répartition des statuts
-                        </h3>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                            {[
-                                { label: 'Passed', val: d1.raw.passed, color: '#10B981' },
-                                { label: 'Failed', val: d1.raw.failed, color: '#EF4444' },
-                                { label: 'Blocked', val: d1.raw.blocked, color: '#F59E0B' },
-                                { label: 'Untested', val: d1.raw.untested, color: '#9CA3AF' }
-                            ].map(stat => (
-                                <div key={stat.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: stat.color }}></div>
-                                        <span style={{ fontSize: '0.9rem', color: 'var(--text-color)' }}>{stat.label}</span>
-                                    </div>
-                                    <span style={{ fontWeight: 600, color: 'var(--text-color)' }}>{stat.val}</span>
+                        {/* Bloc 1: Taux d'Exécution */}
+                        <div className="metric-card" style={{ backgroundColor: 'var(--card-bg)', padding: '0.75rem', borderRadius: '8px', border: `1px solid ${d1.completionRate >= 90 ? '#10B981' : d1.completionRate >= 80 ? '#F59E0B' : '#EF4444'}`, borderLeftWidth: '4px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, marginBottom: '0.25rem' }}>
+                                <Activity size={20} color={d1.completionRate >= 90 ? '#10B981' : d1.completionRate >= 80 ? '#F59E0B' : '#EF4444'} />
+                                <span style={{ fontWeight: 600 }}>Taux d'Exécution</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                                <div style={{ fontSize: '2.5rem', fontWeight: 800, color: d1.completionRate >= 90 ? '#10B981' : d1.completionRate >= 80 ? '#F59E0B' : '#EF4444' }}>
+                                    {d1.completionRate}%
                                 </div>
-                            ))}
+                                <span style={{ fontSize: '1.5rem', color: d1.completionRate >= 90 ? '#10B981' : '#EF4444' }}>
+                                    {d1.completionRate >= 90 ? '▲' : '▼'}
+                                </span>
+                            </div>
+                            <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                <span style={{ padding: '0.2rem 0.5rem', backgroundColor: d1.completionRate >= 90 ? 'rgba(16,185,129,0.1)' : d1.completionRate >= 80 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)', color: d1.completionRate >= 90 ? '#10B981' : d1.completionRate >= 80 ? '#F59E0B' : '#EF4444', borderRadius: '4px', fontWeight: 600 }}>
+                                    {d1.raw.completed} / {d1.raw.total}
+                                </span>
+                                <span style={{ opacity: 0.6 }}>tests exécutés (Cible: ≥ 90%)</span>
+                            </div>
+                            {renderAlert(getAlertForMetric('Completion Rate'))}
+                        </div>
+
+                        {/* Bloc 2: Taux de Succès */}
+                        <div className="metric-card" style={{ backgroundColor: 'var(--card-bg)', padding: '0.75rem', borderRadius: '8px', border: `1px solid ${d1.passRate >= 95 ? '#10B981' : d1.passRate >= 90 ? '#F59E0B' : '#EF4444'}`, borderLeftWidth: '4px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, marginBottom: '0.25rem' }}>
+                                <CheckSquare size={20} color={d1.passRate >= 95 ? '#10B981' : d1.passRate >= 90 ? '#F59E0B' : '#EF4444'} />
+                                <span style={{ fontWeight: 600 }}>Taux de Succès</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                                <div style={{ fontSize: '2.5rem', fontWeight: 800, color: d1.passRate >= 95 ? '#10B981' : d1.passRate >= 90 ? '#F59E0B' : '#EF4444' }}>
+                                    {d1.passRate}%
+                                </div>
+                                <span style={{ fontSize: '1.5rem', color: d1.passRate >= 95 ? '#10B981' : '#EF4444' }}>
+                                    {d1.passRate >= 95 ? '▲' : '▼'}
+                                </span>
+                            </div>
+                            <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                <span style={{ padding: '0.2rem 0.5rem', backgroundColor: d1.passRate >= 95 ? 'rgba(16,185,129,0.1)' : d1.passRate >= 90 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)', color: d1.passRate >= 95 ? '#10B981' : d1.passRate >= 90 ? '#F59E0B' : '#EF4444', borderRadius: '4px', fontWeight: 600 }}>
+                                    {d1.raw.passed}
+                                </span>
+                                <span style={{ opacity: 0.6 }}>{useBusiness ? 'tests réussis (Cible: ≥ 95%)' : 'tests passed (Target: ≥ 95%)'}</span>
+                            </div>
+                            <div style={{ marginTop: '0.4rem', fontSize: '0.75rem', opacity: 0.5 }}>
+                                {useBusiness ? '(Réussis / Total des tests terminés, bloqués ou ignorés)' : '(Passed / Total completed, blocked or skipped)'}
+                            </div>
+                            {renderAlert(getAlertForMetric('Pass Rate') || getAlertForMetric('Blocked Rate'))}
+                        </div>
+
+                        {/* Bloc 3: Taux d'Échec */}
+                        <div className="metric-card" style={{ backgroundColor: 'var(--card-bg)', padding: '0.75rem', borderRadius: '8px', border: `1px solid ${d1.failureRate <= 5 ? '#10B981' : d1.failureRate <= 10 ? '#F59E0B' : '#EF4444'}`, borderLeftWidth: '4px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, marginBottom: '0.25rem' }}>
+                                <XCircle size={20} color={d1.failureRate <= 5 ? '#10B981' : d1.failureRate <= 10 ? '#F59E0B' : '#EF4444'} />
+                                <span style={{ fontWeight: 600 }}>Taux d'Échec</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                                <div style={{ fontSize: '2.5rem', fontWeight: 800, color: d1.failureRate <= 5 ? '#10B981' : d1.failureRate <= 10 ? '#F59E0B' : '#EF4444' }}>
+                                    {d1.failureRate}%
+                                </div>
+                                <span style={{ fontSize: '1.5rem', color: d1.failureRate <= 5 ? '#10B981' : '#EF4444' }}>
+                                    {d1.failureRate <= 5 ? '▼' : '▲'} {/* Inversé : Les échecs doivent descendre */}
+                                </span>
+                            </div>
+                            <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                <span style={{ padding: '0.2rem 0.5rem', backgroundColor: d1.failureRate <= 5 ? 'rgba(16,185,129,0.1)' : d1.failureRate <= 10 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)', color: d1.failureRate <= 5 ? '#10B981' : d1.failureRate <= 10 ? '#F59E0B' : '#EF4444', borderRadius: '4px', fontWeight: 600 }}>
+                                    {d1.raw.failed}
+                                </span>
+                                <span style={{ opacity: 0.6 }}>tests échoués (Cible: ≤ 5%)</span>
+                            </div>
+                            {renderAlert(getAlertForMetric('Failure Rate'))}
+                        </div>
+
+                        {/* Bloc 4: Efficience */}
+                        <div className="metric-card" style={{ backgroundColor: 'var(--card-bg)', padding: '0.75rem', borderRadius: '8px', border: `1px solid ${d1.testEfficiency >= 95 ? '#10B981' : d1.testEfficiency >= 90 ? '#F59E0B' : '#EF4444'}`, borderLeftWidth: '4px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8, marginBottom: '0.25rem' }}>
+                                <TrendingUp size={20} color={d1.testEfficiency >= 95 ? '#10B981' : d1.testEfficiency >= 90 ? '#F59E0B' : '#EF4444'} />
+                                <span style={{ fontWeight: 600 }}>Efficience des tests</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                                <div style={{ fontSize: '2.5rem', fontWeight: 800, color: d1.testEfficiency >= 95 ? '#10B981' : d1.testEfficiency >= 90 ? '#F59E0B' : '#EF4444' }}>
+                                    {d1.testEfficiency}%
+                                </div>
+                                <span style={{ fontSize: '1.5rem', color: d1.testEfficiency >= 95 ? '#10B981' : '#EF4444' }}>
+                                    {d1.testEfficiency >= 95 ? '▲' : '▼'}
+                                </span>
+                            </div>
+                            <div style={{ marginTop: '0.5rem', fontSize: '0.85rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                <span style={{ padding: '0.2rem 0.5rem', backgroundColor: d1.testEfficiency >= 95 ? 'rgba(16,185,129,0.1)' : d1.testEfficiency >= 90 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)', color: d1.testEfficiency >= 95 ? '#10B981' : d1.testEfficiency >= 90 ? '#F59E0B' : '#EF4444', borderRadius: '4px', fontWeight: 600 }}>
+                                    {useBusiness ? 'Objectif' : 'Target'}
+                                </span>
+                                <span style={{ opacity: 0.6 }}>{useBusiness ? 'Approcher les 100% (≥ 95%)' : 'Approach 100% (≥ 95%)'}</span>
+                            </div>
+                            <div style={{ marginTop: '0.4rem', fontSize: '0.75rem', opacity: 0.5 }}>
+                                {useBusiness ? '(Réussis / (Réussis + Échoués) purs)' : '(Passed / (Passed + Failed))'}
+                            </div>
+                            {renderAlert(getAlertForMetric('Test Efficiency'))}
                         </div>
                     </div>
 
-                    <div style={{ backgroundColor: 'var(--card-bg)', padding: '1.5rem', borderRadius: '12px', border: '1px solid var(--border-color)' }}>
-                        <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)' }}>
-                            <Database size={20} /> Campagnes Actives (Aperçu)
-                        </h3>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
-                            {d1.runs.slice(0, 6).map(run => (
-                                <div key={run.id} style={{ padding: '0.75rem', backgroundColor: 'rgba(0,0,0,0.03)', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.05)' }}>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-color)', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                        {run.name}
-                                    </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem' }}>
-                                        <div style={{ flex: 1, height: '6px', backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
-                                            <div style={{ width: `${run.completionRate}%`, height: '100%', backgroundColor: '#3B82F6' }}></div>
+                    {/* Ligne 2 Preprod : Répartition & Campagnes */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '0.75rem', marginBottom: '0.75rem' }}>
+
+                        {/* Répartition des statuts */}
+                        <div style={{ backgroundColor: 'var(--card-bg)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                            <h3 style={{ margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)', fontSize: '1rem' }}>
+                                <BarChart3 size={20} /> Répartition des statuts
+                            </h3>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+                                {[
+                                    { label: useBusiness ? 'Réussis' : 'Passed', val: d1.raw.passed, color: '#10B981' },
+                                    { label: useBusiness ? 'Échoués' : 'Failed', val: d1.raw.failed, color: '#EF4444' },
+                                    { label: useBusiness ? 'Bloqués' : 'Blocked', val: d1.raw.blocked, color: '#F59E0B' },
+                                    { label: useBusiness ? 'Non testés' : 'Untested', val: d1.raw.untested, color: '#9CA3AF' }
+                                ].map(stat => (
+                                    <div key={stat.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                            <div style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: stat.color }}></div>
+                                            <span style={{ fontSize: '0.9rem', color: 'var(--text-color)' }}>{stat.label}</span>
                                         </div>
-                                        <span style={{ opacity: 0.8 }}>{run.completionRate}%</span>
+                                        <span style={{ fontWeight: 600, color: 'var(--text-color)' }}>{stat.val}</span>
                                     </div>
-                                </div>
-                            ))}
-                            {d1.runs.length > 6 && (
-                                <div style={{ padding: '0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.6, fontSize: '0.85rem', fontStyle: 'italic' }}>
-                                    + {d1.runs.length - 6} autres campagnes...
-                                </div>
-                            )}
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Campagnes Actives (Aperçu) - PREPROD */}
+                        <div style={{ backgroundColor: 'var(--card-bg)', padding: '0.75rem', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                            <h3 style={{ margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)', fontSize: '1rem' }}>
+                                <Database size={20} /> Campagnes Actives (Préprod)
+                            </h3>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr)', gap: '0.8rem' }}>
+                                {d1.runs.slice(0, 4).map(run => (
+                                    <div key={run.id} style={{ padding: '0.75rem', backgroundColor: 'rgba(0,0,0,0.03)', borderRadius: '8px', border: '1px solid rgba(0,0,0,0.05)' }}>
+                                        <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-color)', marginBottom: '0.5rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                            {run.name}
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.8rem' }}>
+                                            <div style={{ flex: 1, height: '6px', backgroundColor: 'rgba(0,0,0,0.1)', borderRadius: '3px', overflow: 'hidden' }}>
+                                                <div style={{ width: `${run.completionRate}%`, height: '100%', backgroundColor: '#3B82F6' }}></div>
+                                            </div>
+                                            <span style={{ opacity: 0.8 }}>{run.completionRate}%</span>
+                                        </div>
+                                    </div>
+                                ))}
+                                {d1.runs.length > 4 && (
+                                    <div style={{ padding: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0.6, fontSize: '0.85rem', fontStyle: 'italic' }}>
+                                        + {d1.runs.length - 4} autres campagnes...
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div> {/* Fin Section Preprod */}
+
+                {/* --- SECTION PRODUCTION --- */}
+                <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                        <h2 style={{ fontSize: '1.1rem', color: 'var(--text-color)', margin: 0 }}>
+                            {useBusiness ? 'PRODUCTION' : 'PRODUCTION'}
+                        </h2>
+                        <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }}></div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '0.75rem', marginBottom: '0.5rem' }}>
+
+                        {/* Escape Rate */}
+                        <div style={{ backgroundColor: 'var(--card-bg)', padding: '0.75rem', borderRadius: '8px', border: `2px solid ${escapeOk ? '#10B981' : '#EF4444'}`, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                            <div>
+                                <h3 style={{ margin: '0 0 0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)', fontSize: '1rem' }}>
+                                    <ShieldAlert size={20} /> Taux d'Échappement (Escape Rate)
+                                </h3>
+                                <div style={{ fontSize: '0.9rem', opacity: 0.7 }}>{useBusiness ? 'Jalon' : 'Milestone'}: {rates.prodMilestone} | {useBusiness ? 'Objectif' : 'Target'} &lt; 5%</div>
+                            </div>
+                            <div style={{ textAlign: 'right', marginTop: '0.5rem' }}>
+                                <div style={{ fontSize: '1.8rem', fontWeight: 800, color: escapeOk ? '#10B981' : '#EF4444' }}>{rates.escapeRate}%</div>
+                                <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>{rates.bugsInProd} {useBusiness ? 'bugs prod' : 'prod bugs'}</div>
+                            </div>
+                        </div>
+
+                        {/* Detection Rate (DDP) */}
+                        <div style={{ backgroundColor: 'var(--card-bg)', padding: '0.75rem', borderRadius: '8px', border: `2px solid ${ddpOk ? '#10B981' : '#EF4444'}`, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                            <div>
+                                <h3 style={{ margin: '0 0 0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)', fontSize: '1rem' }}>
+                                    <ShieldCheck size={20} /> Taux de Détection (DDP)
+                                </h3>
+                                <div style={{ fontSize: '0.9rem', opacity: 0.7 }}>{useBusiness ? 'Lié' : 'Linked'}: {rates.prodMilestone} | {useBusiness ? 'Objectif' : 'Target'} &gt; 95%</div>
+                            </div>
+                            <div style={{ textAlign: 'right', marginTop: '0.5rem' }}>
+                                <div style={{ fontSize: '1.8rem', fontWeight: 800, color: ddpOk ? '#10B981' : '#EF4444' }}>{rates.detectionRate}%</div>
+                                <div style={{ fontSize: '0.85rem', opacity: 0.7 }}>{rates.bugsInTest} {useBusiness ? 'bugs test' : 'test bugs'}</div>
+                            </div>
                         </div>
                     </div>
 
-                </div>
+                </div> {/* Fin Section Prod */}
             </div>
         </div>
     );

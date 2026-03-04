@@ -64,17 +64,24 @@ const Dashboard3 = ({ metrics, project, isDark = false, useBusiness = true }) =>
                             <ShieldAlert size={28} />
                             Taux d'Échappement (Escape Rate)
                         </h2>
-                        <div style={{ fontSize: '4.5rem', fontWeight: 800, color: escapeOk ? '#10B981' : '#EF4444' }}>
-                            {rates.escapeRate}%
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                            <div style={{ fontSize: '4.5rem', fontWeight: 800, color: escapeOk ? '#10B981' : '#EF4444' }}>
+                                {rates.escapeRate}%
+                            </div>
+                            <span style={{ fontSize: '2rem', color: escapeOk ? '#10B981' : '#EF4444' }}>
+                                {escapeOk ? '▼' : '▲'} {/* Inversé: Moins c'est mieux */}
+                            </span>
                         </div>
-                        <p style={{ fontSize: '1.2rem', opacity: 0.8, marginTop: '1rem' }}>
-                            Objectif ISTQB: &lt; 5%
+                        <p style={{ fontSize: '1.2rem', opacity: 0.8, marginTop: '1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                            <span style={{ padding: '0.2rem 0.5rem', backgroundColor: escapeOk ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: escapeOk ? '#10B981' : '#EF4444', borderRadius: '4px', fontWeight: 600, fontSize: '1rem' }}>
+                                Cible: &lt; 5%
+                            </span>
                         </p>
                         <div style={{ marginTop: '1.5rem', width: '100%', padding: '1rem', backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: '8px', textAlign: 'center' }}>
                             <span style={{ fontSize: '1.2rem', fontWeight: 600 }}>{rates.bugsInProd}</span>
-                            <span style={{ opacity: 0.8 }}> bugs trouvés en PROD</span>
+                            <span style={{ opacity: 0.8 }}> {useBusiness ? 'bugs trouvés en PROD' : 'bugs found in PROD'}</span>
                             <br />
-                            <span style={{ fontSize: '0.9rem', opacity: 0.6 }}>Milestone: {rates.prodMilestone}</span>
+                            <span style={{ fontSize: '0.9rem', opacity: 0.6 }}>{useBusiness ? 'Jalon' : 'Milestone'}: {rates.prodMilestone}</span>
                         </div>
                     </div>
 
@@ -94,17 +101,24 @@ const Dashboard3 = ({ metrics, project, isDark = false, useBusiness = true }) =>
                             <ShieldCheck size={28} />
                             Taux de Détection (DDP)
                         </h2>
-                        <div style={{ fontSize: '4.5rem', fontWeight: 800, color: ddpOk ? '#10B981' : '#EF4444' }}>
-                            {rates.detectionRate}%
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                            <div style={{ fontSize: '4.5rem', fontWeight: 800, color: ddpOk ? '#10B981' : '#EF4444' }}>
+                                {rates.detectionRate}%
+                            </div>
+                            <span style={{ fontSize: '2rem', color: ddpOk ? '#10B981' : '#EF4444' }}>
+                                {ddpOk ? '▲' : '▼'}
+                            </span>
                         </div>
-                        <p style={{ fontSize: '1.2rem', opacity: 0.8, marginTop: '1rem' }}>
-                            Objectif ISTQB: &gt; 95%
+                        <p style={{ fontSize: '1.2rem', opacity: 0.8, marginTop: '1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                            <span style={{ padding: '0.2rem 0.5rem', backgroundColor: ddpOk ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: ddpOk ? '#10B981' : '#EF4444', borderRadius: '4px', fontWeight: 600, fontSize: '1rem' }}>
+                                Cible: &gt; 95%
+                            </span>
                         </p>
                         <div style={{ marginTop: '1.5rem', width: '100%', padding: '1rem', backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: '8px', textAlign: 'center' }}>
                             <span style={{ fontSize: '1.2rem', fontWeight: 600 }}>{rates.bugsInTest}</span>
-                            <span style={{ opacity: 0.8 }}> bugs trouvés en TEST</span>
+                            <span style={{ opacity: 0.8 }}> {useBusiness ? 'bugs trouvés en TEST' : 'bugs found in TEST'}</span>
                             <br />
-                            <span style={{ fontSize: '0.9rem', opacity: 0.6 }}>Milestone: {rates.prodMilestone}</span>
+                            <span style={{ fontSize: '0.9rem', opacity: 0.6 }}>{useBusiness ? 'Jalon' : 'Milestone'}: {rates.prodMilestone}</span>
                         </div>
                     </div>
                 </div>
@@ -118,10 +132,10 @@ const Dashboard3 = ({ metrics, project, isDark = false, useBusiness = true }) =>
                         Définitions
                     </h3>
                     <p style={{ opacity: 0.8, marginBottom: '0.5rem', fontSize: '0.95rem' }}>
-                        <strong>Escape Rate :</strong> Mesure les défauts qui ont échappé aux tests et ont été découverts en production. Plus le taux est bas, meilleure est la qualité des tests.
+                        <strong>{useBusiness ? 'Taux d\'Échappement :' : 'Escape Rate :'}</strong> Mesure les défauts qui ont échappé aux tests et ont été découverts en production. Plus le taux est bas, meilleure est la qualité des tests.
                     </p>
                     <p style={{ opacity: 0.8, fontSize: '0.95rem' }}>
-                        <strong>Detection Rate (DDP) :</strong> Mesure le pourcentage de défauts identifiés et corrigés avant la mise en production.
+                        <strong>{useBusiness ? 'Taux de Détection (DDP) :' : 'Detection Rate (DDP) :'}</strong> Mesure le pourcentage de défauts identifiés et corrigés avant la mise en production.
                     </p>
                 </div>
 

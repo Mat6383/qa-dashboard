@@ -28,7 +28,8 @@ import {
   Settings,
   Database,
   CheckCircle2,
-  Monitor
+  Monitor,
+  Download
 } from 'lucide-react';
 import './styles/App.css';
 
@@ -46,6 +47,7 @@ function App() {
   const [dashboardView, setDashboardView] = useState('1'); // '1'=Standard, '2'=TV Dashboard, '3'=Quality Rates
   const [useBusinessTerms, setUseBusinessTerms] = useState(true);
   const [backendStatus, setBackendStatus] = useState('checking');
+  const [exportHandler, setExportHandler] = useState(null);
 
   /**
    * Vérifie la santé du backend
@@ -253,6 +255,18 @@ function App() {
             </select>
           </div>
 
+          {/* Export PDF Dashboard 4 */}
+          {dashboardView === '4' && exportHandler && (
+            <button
+              className="btn-icon"
+              style={{ backgroundColor: '#3B82F6', color: 'white', marginRight: '8px', border: 'none' }}
+              onClick={() => exportHandler()}
+              title="Exporter en PDF"
+            >
+              <Download size={16} />
+            </button>
+          )}
+
           {/* Toggle Vocabulaire Métier Switch */}
           <div className="switch-container" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px', marginRight: '8px' }}>
             <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-color)' }}>Vocabulaire Métier</span>
@@ -327,6 +341,7 @@ function App() {
             project={projects.find(p => p.id === projectId)}
             isDark={darkMode}
             useBusiness={useBusinessTerms}
+            setExportHandler={setExportHandler}
           />
         ) : (
           <>

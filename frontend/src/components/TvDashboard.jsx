@@ -49,7 +49,7 @@ const TvDashboard = ({ metrics, project, isDark, useBusiness }) => {
                 <div className="legend-item"><span className="legend-dot ok"></span> OK</div>
                 <div className="legend-item"><span className="legend-dot attention"></span> Attention</div>
                 <div className="legend-item"><span className="legend-dot critique"></span> Critique</div>
-                <div>| Pass ≥80%</div>
+                <div>| {useBusiness ? 'Succès' : 'Pass'} ≥80%</div>
                 <div>MTTR ≤72h</div>
                 <div>WIP ≤20</div>
                 <div>CFR ≤20%</div>
@@ -64,7 +64,7 @@ const TvDashboard = ({ metrics, project, isDark, useBusiness }) => {
                         </div>
                         <h2 className="project-title">{project?.name || 'Neo-Pilot'}</h2>
                         <div className="project-tags">
-                            {metrics.lean?.activeRuns} actifs • 163 total • {metrics.istqb?.milestonesCompleted}/{metrics.istqb?.milestonesTotal} milestones
+                            {metrics.lean?.activeRuns} actifs • 163 total • {metrics.istqb?.milestonesCompleted}/{metrics.istqb?.milestonesTotal} {useBusiness ? 'jalons' : 'milestones'}
                         </div>
                     </div>
 
@@ -82,10 +82,15 @@ const TvDashboard = ({ metrics, project, isDark, useBusiness }) => {
                     <div className="kpi-grid">
                         <div className="kpi-card">
                             <div className="kpi-card-title">ISTQB<br />{useBusiness ? 'Taux Succès Moy.' : 'Avg Pass Rate'}</div>
-                            <div className={`kpi-card-value ${(metrics.istqb?.avgPassRate >= metrics.istqb?.passRateTarget) ? 'success' : 'danger'}`}>
-                                {metrics.istqb?.avgPassRate}%
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', justifyContent: 'center' }}>
+                                <div className={`kpi-card-value ${(metrics.istqb?.avgPassRate >= metrics.istqb?.passRateTarget) ? 'success' : (metrics.istqb?.avgPassRate >= metrics.istqb?.passRateTarget - 5) ? 'warning' : 'danger'}`}>
+                                    {metrics.istqb?.avgPassRate}%
+                                </div>
+                                <span style={{ fontSize: '1.2rem', color: (metrics.istqb?.avgPassRate >= metrics.istqb?.passRateTarget) ? '#10B981' : '#EF4444' }}>
+                                    {(metrics.istqb?.avgPassRate >= metrics.istqb?.passRateTarget) ? '▲' : '▼'}
+                                </span>
                             </div>
-                            <div className="kpi-card-target">≥ {metrics.istqb?.passRateTarget}%</div>
+                            <div className="kpi-card-target">Cible: ≥ {metrics.istqb?.passRateTarget}%</div>
                         </div>
                         <div className="kpi-card">
                             <div className="kpi-card-title">ISTQB<br />{useBusiness ? 'Jalons' : 'Milestones'}</div>
@@ -96,10 +101,15 @@ const TvDashboard = ({ metrics, project, isDark, useBusiness }) => {
                         </div>
                         <div className="kpi-card">
                             <div className="kpi-card-title">ISTQB<br />{useBusiness ? 'Taux de Blocage' : 'Block Rate'}</div>
-                            <div className={`kpi-card-value ${(metrics.istqb?.blockRate <= metrics.istqb?.blockRateTarget) ? 'success' : 'warning'}`}>
-                                {metrics.istqb?.blockRate}%
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', justifyContent: 'center' }}>
+                                <div className={`kpi-card-value ${(metrics.istqb?.blockRate <= metrics.istqb?.blockRateTarget) ? 'success' : (metrics.istqb?.blockRate <= metrics.istqb?.blockRateTarget + 5) ? 'warning' : 'danger'}`}>
+                                    {metrics.istqb?.blockRate}%
+                                </div>
+                                <span style={{ fontSize: '1.2rem', color: (metrics.istqb?.blockRate <= metrics.istqb?.blockRateTarget) ? '#10B981' : '#EF4444' }}>
+                                    {(metrics.istqb?.blockRate <= metrics.istqb?.blockRateTarget) ? '▼' : '▲'}
+                                </span>
                             </div>
-                            <div className="kpi-card-target">≤ {metrics.istqb?.blockRateTarget}%</div>
+                            <div className="kpi-card-target">Cible: ≤ {metrics.istqb?.blockRateTarget}%</div>
                         </div>
                     </div>
                 </div>
@@ -110,10 +120,15 @@ const TvDashboard = ({ metrics, project, isDark, useBusiness }) => {
                     <div className="kpi-grid">
                         <div className="kpi-card">
                             <div className="kpi-card-title">ITIL<br />{useBusiness ? 'Temps Moyen Résolution' : 'MTTR Moyen'}</div>
-                            <div className={`kpi-card-value ${(metrics.itil?.mttr <= metrics.itil?.mttrTarget) ? 'info' : 'danger'}`}>
-                                {metrics.itil?.mttr}h
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', justifyContent: 'center' }}>
+                                <div className={`kpi-card-value ${(metrics.itil?.mttr <= metrics.itil?.mttrTarget) ? 'success' : (metrics.itil?.mttr <= metrics.itil?.mttrTarget + 24) ? 'warning' : 'danger'}`}>
+                                    {metrics.itil?.mttr}h
+                                </div>
+                                <span style={{ fontSize: '1.2rem', color: (metrics.itil?.mttr <= metrics.itil?.mttrTarget) ? '#10B981' : '#EF4444' }}>
+                                    {(metrics.itil?.mttr <= metrics.itil?.mttrTarget) ? '▼' : '▲'}
+                                </span>
                             </div>
-                            <div className="kpi-card-target">≤ {metrics.itil?.mttrTarget}h</div>
+                            <div className="kpi-card-target">Cible: ≤ {metrics.itil?.mttrTarget}h</div>
                         </div>
                         <div className="kpi-card">
                             <div className="kpi-card-title">ITIL<br />{useBusiness ? 'Délai Livraison' : 'Lead Time'}</div>
@@ -124,10 +139,15 @@ const TvDashboard = ({ metrics, project, isDark, useBusiness }) => {
                         </div>
                         <div className="kpi-card">
                             <div className="kpi-card-title">ITIL<br />{useBusiness ? 'Taux Échec Changement' : 'Change Fail Rate'}</div>
-                            <div className={`kpi-card-value ${(metrics.itil?.changeFailRate <= metrics.itil?.changeFailRateTarget) ? 'success' : 'danger'}`}>
-                                {metrics.itil?.changeFailRate}%
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', justifyContent: 'center' }}>
+                                <div className={`kpi-card-value ${(metrics.itil?.changeFailRate <= metrics.itil?.changeFailRateTarget) ? 'success' : (metrics.itil?.changeFailRate <= metrics.itil?.changeFailRateTarget + 10) ? 'warning' : 'danger'}`}>
+                                    {metrics.itil?.changeFailRate}%
+                                </div>
+                                <span style={{ fontSize: '1.2rem', color: (metrics.itil?.changeFailRate <= metrics.itil?.changeFailRateTarget) ? '#10B981' : '#EF4444' }}>
+                                    {(metrics.itil?.changeFailRate <= metrics.itil?.changeFailRateTarget) ? '▼' : '▲'}
+                                </span>
                             </div>
-                            <div className="kpi-card-target">≤ {metrics.itil?.changeFailRateTarget}%</div>
+                            <div className="kpi-card-target">Cible: ≤ {metrics.itil?.changeFailRateTarget}%</div>
                         </div>
                     </div>
                 </div>
@@ -173,7 +193,7 @@ const TvDashboard = ({ metrics, project, isDark, useBusiness }) => {
 
                             <div className="tv-run-progress">
                                 <div className="tv-run-progress-col" style={{ flex: '2', marginRight: '2rem' }}>
-                                    <div className="tv-run-progress-label">Progression</div>
+                                    <div className="tv-run-progress-label">{useBusiness ? 'Progression' : 'Progress'}</div>
                                     <div className="tv-run-progress-bar-bg">
                                         <div className="tv-run-progress-bar-fill" style={{ width: `${run.completionRate}%` }}></div>
                                     </div>
@@ -181,7 +201,7 @@ const TvDashboard = ({ metrics, project, isDark, useBusiness }) => {
                                 </div>
 
                                 <div className="tv-run-passrate">
-                                    <div className="tv-run-passrate-label"><CheckCircle2 className="ok" size={14} /> Pass Rate</div>
+                                    <div className="tv-run-passrate-label"><CheckCircle2 className="ok" size={14} /> {useBusiness ? 'Taux de succès' : 'Pass Rate'}</div>
                                     <div className={`tv-run-passrate-value ${(run.passRate >= 80) ? 'tv-color-green' : 'tv-color-yellow'}`}>
                                         {run.passRate}%
                                     </div>
@@ -190,27 +210,27 @@ const TvDashboard = ({ metrics, project, isDark, useBusiness }) => {
 
                             <div className="tv-run-metrics-grid">
                                 <div className="tv-run-metric">
-                                    <div className="tv-run-metric-label"><XCircle size={12} /> Failures</div>
+                                    <div className="tv-run-metric-label"><XCircle size={12} /> {useBusiness ? 'Échecs' : 'Failures'}</div>
                                     <div className="tv-run-metric-value tv-color-red">{run.failed !== undefined ? run.failed : '...'}</div>
                                 </div>
                                 <div className="tv-run-metric">
-                                    <div className="tv-run-metric-label"><AlertTriangle size={12} /> Blocked</div>
+                                    <div className="tv-run-metric-label"><AlertTriangle size={12} /> {useBusiness ? 'Bloqués' : 'Blocked'}</div>
                                     <div className="tv-run-metric-value tv-color-red">{run.blocked !== undefined ? run.blocked : '...'}</div>
                                 </div>
                                 <div className="tv-run-metric">
-                                    <div className="tv-run-metric-label"><Clock size={12} /> WIP</div>
+                                    <div className="tv-run-metric-label"><Clock size={12} /> {useBusiness ? 'En cours' : 'WIP'}</div>
                                     <div className="tv-run-metric-value tv-color-yellow">{run.wip !== undefined ? run.wip : '...'}</div>
                                 </div>
                                 <div className="tv-run-metric">
-                                    <div className="tv-run-metric-label">⏭ Skipped</div>
+                                    <div className="tv-run-metric-label">⏭ {useBusiness ? 'Ignorés' : 'Skipped'}</div>
                                     <div className="tv-run-metric-value tv-color-gray">{run.skipped !== undefined ? run.skipped : '...'}</div>
                                 </div>
                                 <div className="tv-run-metric">
-                                    <div className="tv-run-metric-label"><RotateCcw size={12} /> Retest</div>
+                                    <div className="tv-run-metric-label"><RotateCcw size={12} /> {useBusiness ? 'À retester' : 'Retest'}</div>
                                     <div className="tv-run-metric-value" style={{ color: '#8B5CF6' }}>{run.retest !== undefined ? run.retest : '...'}</div>
                                 </div>
                                 <div className="tv-run-metric">
-                                    <div className="tv-run-metric-label"><CircleDashed size={12} /> Untested</div>
+                                    <div className="tv-run-metric-label"><CircleDashed size={12} /> {useBusiness ? 'Non testés' : 'Untested'}</div>
                                     <div className="tv-run-metric-value" style={{ color: '#9CA3AF' }}>{run.untested !== undefined ? run.untested : '...'}</div>
                                 </div>
                             </div>
