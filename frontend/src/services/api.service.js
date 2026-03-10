@@ -11,7 +11,7 @@ import axios from 'axios';
 
 // Configuration axios
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-const API_TIMEOUT = 10000;
+const API_TIMEOUT = 30000; // 30 secondes pour compenser le chargement des multiples jalons
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -78,9 +78,12 @@ const apiService = {
    * 
    * @param {number} projectId - ID du projet
    */
-  async getDashboardMetrics(projectId) {
+  async getDashboardMetrics(projectId, preprodMilestones = null, prodMilestones = null) {
     try {
-      const response = await apiClient.get(`/dashboard/${projectId}`);
+      const params = {};
+      if (preprodMilestones) params.preprodMilestones = preprodMilestones.join(',');
+      if (prodMilestones) params.prodMilestones = prodMilestones.join(',');
+      const response = await apiClient.get(`/dashboard/${projectId}`, { params });
       return response.data;
     } catch (error) {
       throw this._handleError('Get Dashboard Metrics', error);
@@ -101,6 +104,20 @@ const apiService = {
       return response.data;
     } catch (error) {
       throw this._handleError('Get Project Runs', error);
+    }
+  },
+
+  /**
+   * Récupère les milestones d'un projet
+   * 
+   * @param {number} projectId - ID du projet
+   */
+  async getProjectMilestones(projectId) {
+    try {
+      const response = await apiClient.get(`/projects/${projectId}/milestones`);
+      return response.data.data; // Le backend renvoie { success: true, data: { result: [...] } }
+    } catch (error) {
+      throw this._handleError('Get Project Milestones', error);
     }
   },
 
@@ -167,7 +184,7 @@ const apiService = {
   _handleError(operation, error) {
     const errorMessage = error.response?.data?.error || error.message;
     console.error(`[API Service] ${operation} failed:`, errorMessage);
-    
+
     return new Error(`${operation}: ${errorMessage}`);
   }
 };

@@ -138,6 +138,35 @@ class TestmoService {
   }
 
   /**
+   * Récupère les milestones d'un projet
+   * 
+   * @param {number} projectId - ID du projet
+   */
+  async getProjectMilestones(projectId) {
+    const cacheKey = `milestones_${projectId}`;
+
+    if (this._isCacheValid(cacheKey)) {
+      return this.cache.get(cacheKey).data;
+    }
+
+    try {
+      const response = await this.client.get(`/projects/${projectId}/milestones`, {
+        params: {
+          per_page: 100,
+          sort: 'milestones:created_at',
+          order: 'desc'
+        }
+      });
+
+      this._setCache(cacheKey, response.data);
+      return response.data;
+
+    } catch (error) {
+      throw this._handleError('getProjectMilestones', error);
+    }
+  }
+
+  /**
    * Récupère les résultats détaillés d'un run
    * API 2025: Nouveau endpoint /runs/{id}/results
    * 
@@ -201,11 +230,35 @@ class TestmoService {
    * @param {number} projectId - ID du projet
    * @returns {Object} Métriques ISTQB complètes
    */
-  async getProjectMetrics(projectId) {
+  async getProjectMetrics(projectId, preprodMilestones = null, prodMilestones = null) {
     try {
       // Récupérer les runs actifs
       const runsData = await this.getProjectRuns(projectId, true);
-      const runs = runsData.result || [];
+      let runs = runsData.result || [];
+
+      // Si sélection manuelle de jalons de préprod / prod
+      if (preprodMilestones && preprodMilestones.length > 0) {
+        try {
+          // On récupère les runs (actifs et fermés) associés aux milestones
+          const runPromises = [];
+          for (const mId of preprodMilestones) {
+            runPromises.push(this.client.get(`/projects/${projectId}/runs`, { params: { milestone_id: mId, is_closed: 0, per_page: 100, expands: 'users,milestones,configs' } }));
+            runPromises.push(this.client.get(`/projects/${projectId}/runs`, { params: { milestone_id: mId, is_closed: 1, per_page: 100, expands: 'users,milestones,configs' } }));
+          }
+          const allRunsData = await Promise.all(runPromises);
+
+          runs = [];
+          allRunsData.forEach(resp => {
+            if (resp.data.result) {
+              runs = runs.concat(resp.data.result);
+            }
+          });
+          logger.info(`[getProjectMetrics] Récupération de ${runs.length} runs pour les jalons ${preprodMilestones.join(', ')}`);
+
+        } catch (e) {
+          logger.error(`Erreur lors de la récupération des runs filtrés par jalon:`, e);
+        }
+      }
 
       // Fetch dynamic TV metrics (Closed Runs & Milestones)
       const [closedRunsResponse, milestonesResponse] = await Promise.all([
@@ -344,8 +397,146 @@ class TestmoService {
    * Calcule le Taux d'Échappement et le Taux de Détection
    * ISTQB: Escape Rate & Defect Detection Percentage (DDP)
    */
-  async getEscapeAndDetectionRates(projectId) {
+  async getEscapeAndDetectionRates(projectId, preprodMilestones = null, prodMilestones = null) {
     try {
+      // --- LOGIQUE CONFIGURABLE (Si des jalons sont explicitement sélectionnés) ---
+      if ((preprodMilestones && preprodMilestones.length > 0) || (prodMilestones && prodMilestones.length > 0)) {
+
+        let allRuns = [];
+        try {
+          // Identifier tous les jalons requis (uniques)
+          const requiredMilestones = [...new Set([
+            ...(preprodMilestones || []),
+            ...(prodMilestones || [])
+          ])];
+
+          // Récupérer les runs (actifs et fermés) associés à tous ces milestones
+          const runPromises = [];
+          for (const mId of requiredMilestones) {
+            runPromises.push(this.client.get(`/projects/${projectId}/runs`, { params: { milestone_id: mId, is_closed: 0, per_page: 100, expands: 'users,milestones,configs' } }));
+            runPromises.push(this.client.get(`/projects/${projectId}/runs`, { params: { milestone_id: mId, is_closed: 1, per_page: 100, expands: 'users,milestones,configs' } }));
+          }
+          const allRunsData = await Promise.all(runPromises);
+
+          allRunsData.forEach(resp => {
+            if (resp.data.result) {
+              allRuns = allRuns.concat(resp.data.result);
+            }
+          });
+          // Filtrer les doublons potentiels (si un même run était retourné plusieurs fois, ce qui théoriquement n'arrive pas via milestone_id, mais sécurité)
+          allRuns = Array.from(new Map(allRuns.map(item => [item.id, item])).values());
+          logger.info(`[getEscapeAndDetectionRates] Récupération unique de ${allRuns.length} runs pour les jalons ${requiredMilestones.join(', ')}`);
+        } catch (e) {
+          logger.error(`Erreur récupération Quality Rates runs spécifiques:`, e);
+        }
+
+        let preprodRuns = [];
+        let prodRuns = [];
+
+        // Gestion de la Préproduction manuelle
+        if (preprodMilestones && preprodMilestones.length > 0) {
+          preprodRuns = allRuns.filter(r => preprodMilestones.includes(r.milestone_id));
+        } else {
+          // Fallback (fonctionnement par défaut) pour la Préproduction si non configurée
+          const latestMiles = [...new Set(allRuns.filter(r => r.milestone_id).map(r => r.milestone_id))].slice(0, 3);
+          if (latestMiles.length > 0) {
+            preprodRuns = allRuns.filter(r => r.milestone_id === latestMiles[0]);
+          }
+        }
+
+        // Gestion de la Production manuelle
+        if (prodMilestones && prodMilestones.length > 0) {
+          const isProdRunFn = (runName) => {
+            const name = runName.toLowerCase();
+            return name.includes('patch') || name.includes('retour de prod') || name.includes('retour') || name.includes('prod');
+          };
+          prodRuns = allRuns.filter(r => prodMilestones.includes(r.milestone_id) && isProdRunFn(r.name));
+        } else {
+          // Fallback (fonctionnement par défaut) pour la Production si non configurée
+          const isProdRunFn = (runName) => {
+            const name = runName.toLowerCase();
+            return name.includes('patch') || name.includes('retour de prod') || name.includes('retour') || name.includes('prod');
+          };
+          const latestMiles = [...new Set(allRuns.filter(r => r.milestone_id).map(r => r.milestone_id))];
+
+          // Cherche la dernière production dans les jalons actuels/précédents
+          for (let i = 0; i < latestMiles.length; i++) {
+            const milestoneRuns = allRuns.filter(r => r.milestone_id === latestMiles[i]);
+            const prodInMilestone = milestoneRuns.filter(r => isProdRunFn(r.name));
+            if (prodInMilestone.length > 0) {
+              prodRuns = prodInMilestone;
+              break;
+            }
+          }
+        }
+
+        if (preprodRuns.length === 0 || prodRuns.length === 0) {
+          return {
+            escapeRate: 0, detectionRate: 0, bugsInProd: 0, bugsInTest: 0, totalBugs: 0,
+            preprodMilestone: 'Sélection incomplète', prodMilestone: 'Sélection incomplète',
+            message: 'Impossible de trouver des runs pour l\'un des environnements.'
+          };
+        }
+
+        // Bugs en TEST = failures in preprod runs
+        let bugsInTest = 0;
+        for (const run of preprodRuns) {
+          bugsInTest += (run.status2_count || 0);
+        }
+
+        // Bugs en PROD = issues in prod runs
+        let bugsInProd = 0;
+        for (const run of prodRuns) {
+          try {
+            const runDetails = run.issues ? run : await this.getRunDetails(run.id);
+            if (runDetails.issues && runDetails.issues.length > 0) {
+              bugsInProd += runDetails.issues.length;
+            } else {
+              const results = await this.client.get(`/runs/${run.id}/results`, { params: { expands: 'issues' } });
+              const failedResultsWithIssues = (results.data.result || []).filter(res => res.issues && res.issues.length > 0);
+              if (failedResultsWithIssues.length > 0) {
+                bugsInProd += failedResultsWithIssues.length;
+              }
+            }
+          } catch (e) {
+            logger.error("Erreur details run production:", e);
+          }
+        }
+
+        const totalBugs = bugsInTest + bugsInProd;
+
+        let preprodMilestoneName = 'Sélection manuelle';
+        if (preprodRuns.length > 0 && preprodRuns[0].milestones && preprodRuns[0].milestones.length > 0) {
+          preprodMilestoneName = preprodRuns[0].milestones[0].name;
+          if (preprodRuns.length > 1 && preprodRuns[1].milestones && preprodRuns[1].milestones.length > 0 && preprodRuns[0].milestones[0].id !== preprodRuns[1].milestones[0].id) {
+            preprodMilestoneName += ' & ' + preprodRuns[1].milestones[0].name;
+          }
+        } else if (preprodRuns[0] && preprodRuns[0].milestone) {
+          preprodMilestoneName = preprodRuns[0].milestone.name;
+        }
+
+        let prodMilestoneName = 'Sélection manuelle';
+        if (prodRuns.length > 0 && prodRuns[0].milestones && prodRuns[0].milestones.length > 0) {
+          prodMilestoneName = prodRuns[0].milestones[0].name;
+          if (prodRuns.length > 1 && prodRuns[1].milestones && prodRuns[1].milestones.length > 0 && prodRuns[0].milestones[0].id !== prodRuns[1].milestones[0].id) {
+            prodMilestoneName += ' & ' + prodRuns[1].milestones[0].name;
+          }
+        } else if (prodRuns[0] && prodRuns[0].milestone) {
+          prodMilestoneName = prodRuns[0].milestone.name;
+        }
+
+        return {
+          escapeRate: totalBugs > 0 ? this._calculatePercentage(bugsInProd, totalBugs) : 0,
+          detectionRate: totalBugs > 0 ? this._calculatePercentage(bugsInTest, totalBugs) : 0,
+          bugsInProd,
+          bugsInTest,
+          totalBugs,
+          preprodMilestone: preprodMilestoneName,
+          prodMilestone: prodMilestoneName
+        };
+      }
+
+      // --- LOGIQUE PAR DEFAUT AUTOMATIQUE ---
       // 1. Récupérer les milestones actives (non complétées)
       const milestonesResponse = await this.client.get(`/projects/${projectId}/milestones`, {
         params: { is_completed: 0, sort: 'milestones:created_at', order: 'desc', per_page: 100 }
@@ -401,23 +592,23 @@ class TestmoService {
         };
       }
 
-      // 2. Bugs en TEST = somme des tests failed (status_id=2) dans les autres runs de la PROD (sans "patch" ni "retour")
+      // 2. Bugs en TEST = somme des tests failed (status_id=2) dans les autres runs de la PROD (sans les mots clés de prod)
       let bugsInTest = 0;
-      const testRuns = prodRuns.filter(r =>
-        !r.name.toLowerCase().includes('patch') &&
-        !r.name.toLowerCase().includes('retour')
-      );
+
+      const isProdRunFn = (runName) => {
+        const name = runName.toLowerCase();
+        return name.includes('patch') || name.includes('retour de prod') || name.includes('retour') || name.includes('prod');
+      };
+
+      const testRuns = prodRuns.filter(r => !isProdRunFn(r.name));
 
       for (const run of testRuns) {
         bugsInTest += (run.status2_count || 0);
       }
 
-      // 3. Bugs en PROD = somme des issues dans les runs contenant "patch" ou "retour"
+      // 3. Bugs en PROD = somme des issues dans les runs contenant les mots clés de prod
       let bugsInProd = 0;
-      const patchRuns = prodRuns.filter(r =>
-        r.name.toLowerCase().includes('patch') ||
-        r.name.toLowerCase().includes('retour')
-      );
+      const patchRuns = prodRuns.filter(r => isProdRunFn(r.name));
 
       for (const run of patchRuns) {
         // En Testmo, les issues remises au niveau du run sont dispos dans run.issues

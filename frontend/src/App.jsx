@@ -21,6 +21,7 @@ import RunsList from './components/RunsList';
 import TvDashboard from './components/TvDashboard';
 import Dashboard3 from './components/Dashboard3';
 import Dashboard4 from './components/Dashboard4';
+import ConfigurationScreen from './components/ConfigurationScreen';
 import {
   RefreshCw,
   AlertCircle,
@@ -48,6 +49,10 @@ function App() {
   const [useBusinessTerms, setUseBusinessTerms] = useState(true);
   const [backendStatus, setBackendStatus] = useState('checking');
   const [exportHandler, setExportHandler] = useState(null);
+
+  // Configuration personnalisée des jalons (milestones)
+  const [selectedPreprodMilestones, setSelectedPreprodMilestones] = useState([]);
+  const [selectedProdMilestones, setSelectedProdMilestones] = useState([]);
 
   /**
    * Vérifie la santé du backend
@@ -85,9 +90,18 @@ function App() {
       setLoading(true);
       setError(null);
 
+      const params = new URLSearchParams();
+      if (selectedPreprodMilestones.length > 0) params.append('preprodMilestones', selectedPreprodMilestones.join(','));
+      if (selectedProdMilestones.length > 0) params.append('prodMilestones', selectedProdMilestones.join(','));
+      const queryString = params.toString() ? `?${params.toString()}` : '';
+
       const [metricsResponse, qualityResponse] = await Promise.all([
-        apiService.getDashboardMetrics(projectId),
-        fetch(`http://localhost:3001/api/dashboard/${projectId}/quality-rates`).then(res => res.json()).catch(() => ({ success: false }))
+        apiService.getDashboardMetrics(
+          projectId,
+          selectedPreprodMilestones.length > 0 ? selectedPreprodMilestones : null,
+          selectedProdMilestones.length > 0 ? selectedProdMilestones : null
+        ),
+        fetch(`http://localhost:3001/api/dashboard/${projectId}/quality-rates${queryString}`).then(res => res.json()).catch(() => ({ success: false }))
       ]);
 
       if (metricsResponse.success) {
@@ -106,7 +120,7 @@ function App() {
     } finally {
       setLoading(false);
     }
-  }, [projectId]);
+  }, [projectId, selectedPreprodMilestones, selectedProdMilestones]);
 
   /**
    * Nettoie le cache backend
@@ -252,6 +266,7 @@ function App() {
               <option value="2">Dashboard 2 (TV)</option>
               <option value="3">Dashboard 3 (Quality Rates)</option>
               <option value="4">Dashboard 4 (Vue Globale & PDF)</option>
+              <option value="5">⚙️ Configuration des Cycles</option>
             </select>
           </div>
 
@@ -342,6 +357,19 @@ function App() {
             isDark={darkMode}
             useBusiness={useBusinessTerms}
             setExportHandler={setExportHandler}
+          />
+        ) : dashboardView === '5' ? (
+          <ConfigurationScreen
+            projectId={projectId}
+            isDark={darkMode}
+            initialPreprodMilestones={selectedPreprodMilestones}
+            initialProdMilestones={selectedProdMilestones}
+            onSaveSelection={(preprodMilestones, prodMilestones) => {
+              setSelectedPreprodMilestones(preprodMilestones || []);
+              setSelectedProdMilestones(prodMilestones || []);
+              // Retourner au dashboard global par défaut après validation
+              setDashboardView('1');
+            }}
           />
         ) : (
           <>
