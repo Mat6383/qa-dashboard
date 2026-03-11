@@ -202,7 +202,7 @@ function App() {
   }
 
   return (
-    <div className={`app ${tvMode ? 'tv-mode' : ''} ${darkMode ? 'dark-theme' : ''}`}>
+    <div className={`app ${tvMode ? 'tv-mode' : ''} ${darkMode ? 'dark-theme' : ''} view-dash${dashboardView}`}>
       {/* Header */}
       <header className="app-header">
         <div className="header-left">
