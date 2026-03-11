@@ -114,7 +114,7 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
                 {/* --- SECTION PRÉPRODUCTION --- */}
                 <div style={{ marginBottom: '0.75rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        <h2 style={{ fontSize: '1.1rem', color: 'var(--text-color)', margin: 0 }}>
+                        <h2 style={{ fontSize: '1.35rem', color: 'var(--text-color)', margin: 0 }}>
                             {useBusiness ? 'PRÉPRODUCTION' : 'PREPROD'}
                         </h2>
                         <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }}></div>
@@ -127,7 +127,7 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
                         <div className="metric-card" style={{ backgroundColor: 'var(--card-bg)', padding: '1.25rem', borderRadius: '12px', border: `1px solid ${d1.completionRate >= 90 ? '#10B981' : d1.completionRate >= 80 ? '#F59E0B' : '#EF4444'}`, borderLeftWidth: '6px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
                                 <Activity size={24} color={d1.completionRate >= 90 ? '#10B981' : d1.completionRate >= 80 ? '#F59E0B' : '#EF4444'} />
-                                <span style={{ fontWeight: 600, fontSize: '1.25rem', color: 'var(--text-color)' }}>Taux d'Exécution</span>
+                                <span style={{ fontWeight: 600, fontSize: '1.4rem', color: 'var(--text-color)' }}>Taux d'Exécution</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
                                 <div style={{ fontSize: '3rem', fontWeight: 800, color: d1.completionRate >= 90 ? '#10B981' : d1.completionRate >= 80 ? '#F59E0B' : '#EF4444' }}>
@@ -150,7 +150,7 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
                         <div className="metric-card" style={{ backgroundColor: 'var(--card-bg)', padding: '1.25rem', borderRadius: '12px', border: `1px solid ${d1.passRate >= 95 ? '#10B981' : d1.passRate >= 90 ? '#F59E0B' : '#EF4444'}`, borderLeftWidth: '6px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
                                 <CheckSquare size={24} color={d1.passRate >= 95 ? '#10B981' : d1.passRate >= 90 ? '#F59E0B' : '#EF4444'} />
-                                <span style={{ fontWeight: 600, fontSize: '1.25rem', color: 'var(--text-color)' }}>Taux de Succès</span>
+                                <span style={{ fontWeight: 600, fontSize: '1.4rem', color: 'var(--text-color)' }}>Taux de Succès</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
                                 <div style={{ fontSize: '3rem', fontWeight: 800, color: d1.passRate >= 95 ? '#10B981' : d1.passRate >= 90 ? '#F59E0B' : '#EF4444' }}>
@@ -176,7 +176,7 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
                         <div className="metric-card" style={{ backgroundColor: 'var(--card-bg)', padding: '1.25rem', borderRadius: '12px', border: `1px solid ${d1.failureRate <= 5 ? '#10B981' : d1.failureRate <= 10 ? '#F59E0B' : '#EF4444'}`, borderLeftWidth: '6px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
                                 <XCircle size={24} color={d1.failureRate <= 5 ? '#10B981' : d1.failureRate <= 10 ? '#F59E0B' : '#EF4444'} />
-                                <span style={{ fontWeight: 600, fontSize: '1.25rem', color: 'var(--text-color)' }}>Taux d'Échec</span>
+                                <span style={{ fontWeight: 600, fontSize: '1.4rem', color: 'var(--text-color)' }}>Taux d'Échec</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
                                 <div style={{ fontSize: '3rem', fontWeight: 800, color: d1.failureRate <= 5 ? '#10B981' : d1.failureRate <= 10 ? '#F59E0B' : '#EF4444' }}>
@@ -199,7 +199,7 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
                         <div className="metric-card" style={{ backgroundColor: 'var(--card-bg)', padding: '1.25rem', borderRadius: '12px', border: `1px solid ${d1.testEfficiency >= 95 ? '#10B981' : d1.testEfficiency >= 90 ? '#F59E0B' : '#EF4444'}`, borderLeftWidth: '6px' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
                                 <TrendingUp size={24} color={d1.testEfficiency >= 95 ? '#10B981' : d1.testEfficiency >= 90 ? '#F59E0B' : '#EF4444'} />
-                                <span style={{ fontWeight: 600, fontSize: '1.25rem', color: 'var(--text-color)' }}>Efficience des tests</span>
+                                <span style={{ fontWeight: 600, fontSize: '1.4rem', color: 'var(--text-color)' }}>Efficience des tests</span>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
                                 <div style={{ fontSize: '3rem', fontWeight: 800, color: d1.testEfficiency >= 95 ? '#10B981' : d1.testEfficiency >= 90 ? '#F59E0B' : '#EF4444' }}>
@@ -243,7 +243,7 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
 
                     {/* Ligne 3 Preprod : Campagnes Actives */}
                     <div style={{ backgroundColor: 'var(--card-bg)', padding: '1.25rem', borderRadius: '12px', border: '1px solid var(--border-color)', marginBottom: '1rem' }}>
-                        <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)', fontSize: '1.25rem' }}>
+                        <h3 style={{ margin: '0 0 1rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)', fontSize: '1.35rem' }}>
                             <Database size={24} color="var(--color-primary)" /> Campagnes Actives (Préproduction)
                         </h3>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
@@ -273,7 +273,7 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
                 {/* --- SECTION PRODUCTION --- */}
                 <div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                        <h2 style={{ fontSize: '1.1rem', color: 'var(--text-color)', margin: 0 }}>
+                        <h2 style={{ fontSize: '1.35rem', color: 'var(--text-color)', margin: 0 }}>
                             {useBusiness ? 'PRODUCTION' : 'PRODUCTION'}
                         </h2>
                         <div style={{ flex: 1, height: '1px', backgroundColor: 'var(--border-color)' }}></div>
@@ -284,7 +284,7 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
                         {/* Escape Rate */}
                         <div style={{ backgroundColor: 'var(--card-bg)', padding: '0.75rem', borderRadius: '8px', border: `2px solid ${escapeOk ? '#10B981' : '#EF4444'}`, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                             <div>
-                                <h3 style={{ margin: '0 0 0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)', fontSize: '1.2rem' }}>
+                                <h3 style={{ margin: '0 0 0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)', fontSize: '1.3rem' }}>
                                     <ShieldAlert size={20} /> Taux d'Échappement (Escape Rate)
                                 </h3>
                                 <div style={{ fontSize: '1.05rem', opacity: 0.7 }}>{useBusiness ? 'Jalon' : 'Milestone'}: {rates.prodMilestone} | {useBusiness ? 'Objectif' : 'Target'} &lt; 5%</div>
@@ -298,7 +298,7 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
                         {/* Detection Rate (DDP) */}
                         <div style={{ backgroundColor: 'var(--card-bg)', padding: '0.75rem', borderRadius: '8px', border: `2px solid ${ddpOk ? '#10B981' : '#EF4444'}`, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                             <div>
-                                <h3 style={{ margin: '0 0 0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)', fontSize: '1.2rem' }}>
+                                <h3 style={{ margin: '0 0 0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)', fontSize: '1.3rem' }}>
                                     <ShieldCheck size={20} /> Taux de Détection (DDP)
                                 </h3>
                                 <div style={{ fontSize: '1.05rem', opacity: 0.7 }}>{useBusiness ? 'Lié' : 'Linked'}: {rates.prodMilestone} | {useBusiness ? 'Objectif' : 'Target'} &gt; 95%</div>
