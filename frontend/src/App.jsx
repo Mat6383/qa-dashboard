@@ -151,16 +151,40 @@ function App() {
     loadDashboardMetrics();
   }, [checkBackendHealth, loadProjects, loadDashboardMetrics]);
 
-  // Effet: Auto-refresh toutes les 5m (LEAN)
+  // Effet: Auto-refresh toutes les minutes (LEAN)
   useEffect(() => {
     if (!autoRefresh) return;
 
     const interval = setInterval(() => {
-      console.log('[Auto-refresh] Rechargement des métriques...');
+      console.log('[Auto-refresh] Rechargement des métriques (1m)...');
       loadDashboardMetrics();
-    }, 300000); // 5 minutes
+    }, 60000); // 1 minute
 
     return () => clearInterval(interval);
+  }, [autoRefresh, loadDashboardMetrics]);
+
+  // Effet: Rafraichissement forcé au retour sur la page (ex: plein écran F11 après veille)
+  useEffect(() => {
+    if (!autoRefresh) return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        console.log('[Auto-refresh] Retour focus/visibilité - Rechargement immédiat des métriques');
+        loadDashboardMetrics();
+      }
+    };
+
+    window.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('focus', handleVisibilityChange);
+    // Certains navigateurs peuvent bloquer les updates visuelles en fullscreen s'il n'y a pas d'activité.
+    // L'évènement `resize` pinge lors d'une entrée/sortie F11 pour être sûr que les données s'alignent.
+    window.addEventListener('resize', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('focus', handleVisibilityChange);
+      window.removeEventListener('resize', handleVisibilityChange);
+    };
   }, [autoRefresh, loadDashboardMetrics]);
 
   /**
