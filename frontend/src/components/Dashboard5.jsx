@@ -11,7 +11,7 @@ import {
     Loader2,
     AlertCircle
 } from 'lucide-react';
-import { apiService } from '../services/api.service';
+import apiService from '../services/api.service';
 
 const Dashboard5 = ({ projectId, isDark, useBusiness }) => {
     const [trends, setTrends] = useState([]);
