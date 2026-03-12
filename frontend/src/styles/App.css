@@ -123,8 +123,8 @@ body {
   margin-bottom: 1.5rem;
 }
 
-/* Header Auto-hide in Dashboard 4 TV Mode */
-.app.tv-mode.view-dash4 .app-header {
+/* Header Auto-hide in TV Mode (All Dashboards) */
+.app.tv-mode .app-header {
   position: absolute;
   top: 0;
   left: 0;
@@ -135,7 +135,7 @@ body {
 }
 
 /* Create an invisible hover area below the hidden header */
-.app.tv-mode.view-dash4 .app-header::after {
+.app.tv-mode .app-header::after {
   content: '';
   position: absolute;
   bottom: -30px; /* 30px trigger area */
@@ -145,11 +145,11 @@ body {
   background: transparent;
 }
 
-.app.tv-mode.view-dash4 .app-header:hover {
+.app.tv-mode .app-header:hover {
   transform: translateY(0);
 }
 
-.app.tv-mode.view-dash4 .app-main {
+.app.tv-mode .app-main {
   margin-top: 0; /* Since header is absolute, main content takes full screen */
   padding-top: 1rem;
 }
