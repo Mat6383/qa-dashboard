@@ -35,24 +35,41 @@ import {
 import './styles/App.css';
 
 function App() {
-  // État de l'application
-  const [projectId, setProjectId] = useState(1); // À configurer
+  // État de l'application (avec persistance localStorage)
+  const [projectId, setProjectId] = useState(() => parseInt(localStorage.getItem('testmo_projectId')) || 1);
   const [metrics, setMetrics] = useState(null);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [autoRefresh, setAutoRefresh] = useState(true);
-  const [tvMode, setTvMode] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
-  const [dashboardView, setDashboardView] = useState('1'); // '1'=Standard, '2'=TV Dashboard, '3'=Quality Rates
-  const [useBusinessTerms, setUseBusinessTerms] = useState(true);
+  const [tvMode, setTvMode] = useState(() => localStorage.getItem('testmo_tvMode') !== 'false');
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('testmo_darkMode') === 'true');
+  const [dashboardView, setDashboardView] = useState(() => localStorage.getItem('testmo_dashboardView') || '1');
+  const [useBusinessTerms, setUseBusinessTerms] = useState(() => localStorage.getItem('testmo_useBusinessTerms') !== 'false');
   const [backendStatus, setBackendStatus] = useState('checking');
   const [exportHandler, setExportHandler] = useState(null);
 
-  // Configuration personnalisée des jalons (milestones)
-  const [selectedPreprodMilestones, setSelectedPreprodMilestones] = useState([]);
-  const [selectedProdMilestones, setSelectedProdMilestones] = useState([]);
+  // Configuration personnalisée des jalons (milestones) avec persistance
+  const [selectedPreprodMilestones, setSelectedPreprodMilestones] = useState(() => {
+    const saved = localStorage.getItem('testmo_selectedPreprodMilestones');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [selectedProdMilestones, setSelectedProdMilestones] = useState(() => {
+    const saved = localStorage.getItem('testmo_selectedProdMilestones');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Effet: Sauvegarde des préférences dans le localStorage
+  useEffect(() => {
+    localStorage.setItem('testmo_projectId', projectId);
+    localStorage.setItem('testmo_selectedPreprodMilestones', JSON.stringify(selectedPreprodMilestones));
+    localStorage.setItem('testmo_selectedProdMilestones', JSON.stringify(selectedProdMilestones));
+    localStorage.setItem('testmo_dashboardView', dashboardView);
+    localStorage.setItem('testmo_tvMode', tvMode);
+    localStorage.setItem('testmo_darkMode', darkMode);
+    localStorage.setItem('testmo_useBusinessTerms', useBusinessTerms);
+  }, [projectId, selectedPreprodMilestones, selectedProdMilestones, dashboardView, tvMode, darkMode, useBusinessTerms]);
 
   /**
    * Vérifie la santé du backend
@@ -405,10 +422,10 @@ function App() {
             {/* Graphiques */}
             <section className="section charts-section">
               <div className="chart-container">
-                <StatusChart metrics={metrics} chartType="doughnut" useBusiness={useBusinessTerms} />
+                <StatusChart metrics={metrics} chartType="doughnut" useBusiness={useBusinessTerms} isDark={darkMode} />
               </div>
               <div className="chart-container">
-                <StatusChart metrics={metrics} chartType="bar" useBusiness={useBusinessTerms} />
+                <StatusChart metrics={metrics} chartType="bar" useBusiness={useBusinessTerms} isDark={darkMode} />
               </div>
             </section>
 

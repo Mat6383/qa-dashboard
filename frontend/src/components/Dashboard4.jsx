@@ -44,6 +44,12 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
         return metrics.slaStatus.alerts.find(a => a.metric === metricName);
     };
 
+    const getPassRateColor = (passRate) => {
+        if (passRate >= 95) return '#10B981';
+        if (passRate >= 90) return '#F59E0B';
+        return '#EF4444';
+    };
+
     const renderAlert = (alert) => {
         if (!alert) return null;
         return (
@@ -99,7 +105,7 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
             {/* Conteneur principal à exporter en PDF */}
             <div
                 ref={dashboardRef}
-                className={`tv-dashboard ${isDark ? 'dark' : ''}`}
+                className={`tv-dashboard ${isDark ? 'tv-dark-theme' : ''}`}
                 style={{
                     padding: '0.75rem 1.5rem',
                     backgroundColor: 'var(--bg-color)',
@@ -141,7 +147,7 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
                                 <span style={{ padding: '0.2rem 0.6rem', backgroundColor: d1.completionRate >= 90 ? 'rgba(16,185,129,0.1)' : d1.completionRate >= 80 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)', color: d1.completionRate >= 90 ? '#10B981' : d1.completionRate >= 80 ? '#F59E0B' : '#EF4444', borderRadius: '6px', fontWeight: 600 }}>
                                     {d1.raw.completed} / {d1.raw.total}
                                 </span>
-                                <span style={{ color: 'var(--text-muted)' }}>tests exécutés (Cible: ≥ 90%)</span>
+                                <span style={{ color: 'var(--text-muted)' }}>{useBusiness ? 'tests exécutés (Cible: ≥ 90%)' : 'tests executed (Target: ≥ 90%)'}</span>
                             </div>
                             {renderAlert(getAlertForMetric('Completion Rate'))}
                         </div>
@@ -190,7 +196,7 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
                                 <span style={{ padding: '0.2rem 0.6rem', backgroundColor: d1.failureRate <= 5 ? 'rgba(16,185,129,0.1)' : d1.failureRate <= 10 ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)', color: d1.failureRate <= 5 ? '#10B981' : d1.failureRate <= 10 ? '#F59E0B' : '#EF4444', borderRadius: '6px', fontWeight: 600 }}>
                                     {d1.raw.failed}
                                 </span>
-                                <span style={{ color: 'var(--text-muted)' }}>tests échoués (Cible: ≤ 5%)</span>
+                                <span style={{ color: 'var(--text-muted)' }}>{useBusiness ? 'tests échoués (Cible: ≤ 5%)' : 'tests failed (Target: ≤ 5%)'}</span>
                             </div>
                             {renderAlert(getAlertForMetric('Failure Rate'))}
                         </div>
@@ -248,16 +254,27 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
                         </h3>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
                             {d1.runs.slice(0, 8).map(run => (
-                                <div key={run.id} style={{ padding: '1rem', backgroundColor: 'var(--bg-color)', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                <div key={run.id} style={{ padding: '1rem', backgroundColor: 'var(--bg-color)', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                                     <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-color)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                         {run.name}
                                     </div>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '1rem' }}>
+                                    
+                                    {/* Progression */}
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.95rem' }}>
                                         <span style={{ color: 'var(--text-muted)' }}>Progression</span>
                                         <span style={{ fontWeight: 700, color: 'var(--text-color)' }}>{run.completionRate}%</span>
                                     </div>
-                                    <div style={{ width: '100%', height: '10px', backgroundColor: 'var(--border-color)', borderRadius: '5px', overflow: 'hidden' }}>
+                                    <div style={{ width: '100%', height: '8px', backgroundColor: 'var(--border-color)', borderRadius: '4px', overflow: 'hidden' }}>
                                         <div style={{ width: `${run.completionRate}%`, height: '100%', backgroundColor: run.completionRate >= 90 ? '#10B981' : run.completionRate >= 80 ? '#F59E0B' : '#3B82F6' }}></div>
+                                    </div>
+
+                                    {/* Taux de succès */}
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.95rem', marginTop: '0.2rem' }}>
+                                        <span style={{ color: 'var(--text-muted)' }}>{useBusiness ? 'Taux de succès' : 'Pass Rate'}</span>
+                                        <span style={{ fontWeight: 700, color: getPassRateColor(run.passRate) }}>{run.passRate}%</span>
+                                    </div>
+                                    <div style={{ width: '100%', height: '8px', backgroundColor: 'var(--border-color)', borderRadius: '4px', overflow: 'hidden' }}>
+                                        <div style={{ width: `${run.passRate}%`, height: '100%', backgroundColor: getPassRateColor(run.passRate) }}></div>
                                     </div>
                                 </div>
                             ))}
@@ -287,11 +304,11 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
                                 <h3 style={{ margin: '0 0 0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)', fontSize: '1.3rem' }}>
                                     <ShieldAlert size={20} /> Taux d'Échappement (Escape Rate)
                                 </h3>
-                                <div style={{ fontSize: '1.05rem', opacity: 0.7 }}>{useBusiness ? 'Jalon' : 'Milestone'}: {rates.prodMilestone} | {useBusiness ? 'Objectif' : 'Target'} &lt; 5%</div>
+                                <div style={{ fontSize: '1.05rem', color: 'var(--text-muted)' }}>{useBusiness ? 'Jalon' : 'Milestone'}: {rates.prodMilestone} | {useBusiness ? 'Objectif' : 'Target'} &lt; 5%</div>
                             </div>
                             <div style={{ textAlign: 'right', marginTop: '0.5rem' }}>
                                 <div style={{ fontSize: '2rem', fontWeight: 800, color: escapeOk ? '#10B981' : '#EF4444' }}>{rates.escapeRate}%</div>
-                                <div style={{ fontSize: '1rem', opacity: 0.7 }}>{rates.bugsInProd} {useBusiness ? 'bugs prod' : 'prod bugs'}</div>
+                                <div style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>{rates.bugsInProd} {useBusiness ? 'bugs prod' : 'prod bugs'}</div>
                             </div>
                         </div>
 
@@ -301,11 +318,11 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
                                 <h3 style={{ margin: '0 0 0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)', fontSize: '1.3rem' }}>
                                     <ShieldCheck size={20} /> Taux de Détection (DDP)
                                 </h3>
-                                <div style={{ fontSize: '1.05rem', opacity: 0.7 }}>{useBusiness ? 'Lié' : 'Linked'}: {rates.prodMilestone} | {useBusiness ? 'Objectif' : 'Target'} &gt; 95%</div>
+                                <div style={{ fontSize: '1.05rem', color: 'var(--text-muted)' }}>{useBusiness ? 'Lié' : 'Linked'}: {rates.prodMilestone} | {useBusiness ? 'Objectif' : 'Target'} &gt; 95%</div>
                             </div>
                             <div style={{ textAlign: 'right', marginTop: '0.5rem' }}>
                                 <div style={{ fontSize: '2rem', fontWeight: 800, color: ddpOk ? '#10B981' : '#EF4444' }}>{rates.detectionRate}%</div>
-                                <div style={{ fontSize: '1rem', opacity: 0.7 }}>{rates.bugsInTest} {useBusiness ? 'bugs test' : 'test bugs'}</div>
+                                <div style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>{rates.bugsInTest} {useBusiness ? 'bugs test' : 'test bugs'}</div>
                             </div>
                         </div>
                     </div>

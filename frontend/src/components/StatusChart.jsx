@@ -35,7 +35,7 @@ ChartJS.register(
   Legend
 );
 
-const StatusChart = ({ metrics, chartType = 'doughnut', useBusiness }) => {
+const StatusChart = ({ metrics, chartType = 'doughnut', useBusiness, isDark = false }) => {
   if (!metrics || !metrics.statusDistribution) {
     return <div className="chart-loading">Chargement des graphiques...</div>;
   }
@@ -65,6 +65,7 @@ const StatusChart = ({ metrics, chartType = 'doughnut', useBusiness }) => {
         position: 'bottom',
         labels: {
           padding: 15,
+          color: isDark ? '#E2E8F0' : '#111827',
           font: {
             size: 12,
             family: "'Inter', sans-serif"
@@ -87,6 +88,7 @@ const StatusChart = ({ metrics, chartType = 'doughnut', useBusiness }) => {
       title: {
         display: true,
         text: useBusiness ? 'Distribution des Statuts de Tests' : 'Test Status Distribution',
+        color: isDark ? '#E2E8F0' : '#111827',
         font: {
           size: 16,
           weight: 'bold'
@@ -133,6 +135,7 @@ const StatusChart = ({ metrics, chartType = 'doughnut', useBusiness }) => {
       title: {
         display: true,
         text: useBusiness ? 'Répartition par Statut' : 'Status Distribution',
+        color: isDark ? '#E2E8F0' : '#111827',
         font: {
           size: 16,
           weight: 'bold'
@@ -143,7 +146,19 @@ const StatusChart = ({ metrics, chartType = 'doughnut', useBusiness }) => {
       y: {
         beginAtZero: true,
         ticks: {
-          precision: 0
+          precision: 0,
+          color: isDark ? '#9CA3AF' : '#6B7280'
+        },
+        grid: {
+          color: isDark ? '#1E3A8A' : '#E5E7EB'
+        }
+      },
+      x: {
+        ticks: {
+          color: isDark ? '#9CA3AF' : '#6B7280'
+        },
+        grid: {
+          display: false
         }
       }
     }

@@ -104,7 +104,7 @@ const MetricCard = ({ title, subtitle, value, total, target, icon: Icon, color, 
       <div className="card-header">
         <div className="card-title">
           <h3>{title}</h3>
-          <span className="subtitle" style={{ fontSize: '0.9rem', opacity: 0.8 }}>{subtitle}</span>
+          <span className="subtitle" style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{subtitle}</span>
         </div>
         <div className="card-icon" style={{ backgroundColor: `${color}20`, padding: '10px', borderRadius: '50%' }}>
           <Icon size={24} color={color} />
@@ -122,12 +122,12 @@ const MetricCard = ({ title, subtitle, value, total, target, icon: Icon, color, 
           <span style={{ padding: '0.2rem 0.5rem', backgroundColor: `${color}15`, color, borderRadius: '4px', fontWeight: 600, fontSize: '0.85rem' }}>
             {total}
           </span>
-          {target && <span style={{ fontSize: '0.85rem', opacity: 0.7 }}>(Cible: {target})</span>}
+          {target && <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>(Cible: {target})</span>}
         </div>
       </div>
 
       <div className="card-footer" style={{ marginTop: '1rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-        <span className="description" style={{ fontSize: '0.8rem', opacity: 0.6 }}>{description}</span>
+        <span className="description" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{description}</span>
 
         {alert && (
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', padding: '0.75rem', backgroundColor: alert.severity === 'warning' ? 'rgba(245,158,11,0.1)' : 'rgba(239,68,68,0.1)', borderRadius: '6px', color: alert.severity === 'warning' ? '#F59E0B' : '#EF4444' }}>

@@ -55,8 +55,8 @@ const RunCard = ({ run, index, useBusiness }) => {
       {/* Header */}
       <div className="run-card-header">
         <div className="run-info">
-          <h4 className="run-name">{run.name}</h4>
-          <span className="run-id">ID: {run.id}</span>
+          <h4 className="run-name" style={{ color: 'var(--text-color)' }}>{run.name}</h4>
+          <span className="run-id" style={{ color: 'var(--text-muted)' }}>ID: {run.id}</span>
         </div>
         <div
           className="run-status-badge"
