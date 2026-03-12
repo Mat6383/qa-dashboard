@@ -208,7 +208,7 @@ class TestmoService {
     try {
       const response = await this.client.get(`/projects/${projectId}/automation/runs`, {
         params: {
-          per_page: 50,
+          per_page: 100,
           sort: 'automation_runs:created_at',
           order: 'desc',
           expands: 'users,milestones'
@@ -262,7 +262,7 @@ class TestmoService {
 
       // Fetch dynamic TV metrics (Closed Runs & Milestones)
       const [closedRunsResponse, milestonesResponse] = await Promise.all([
-        this.client.get(`/projects/${projectId}/runs`, { params: { is_closed: 1, per_page: 1 } }).catch(() => ({ data: { total: 0 } })),
+        this.client.get(`/projects/${projectId}/runs`, { params: { is_closed: 1, per_page: 100 } }).catch(() => ({ data: { total: 0 } })),
         this.client.get(`/projects/${projectId}/milestones`, { params: { per_page: 100 } }).catch(() => ({ data: { result: [] } }))
       ]);
 
@@ -668,11 +668,11 @@ class TestmoService {
     }
 
     try {
-      // 1. Récupérer les 20 derniers jalons (Milestones)
+      // 1. Récupérer les derniers jalons (Milestones)
       const milestonesResponse = await this.client.get(`/projects/${projectId}/milestones`, {
-        params: { sort: 'milestones:created_at', order: 'desc', per_page: 20 }
+        params: { sort: 'milestones:created_at', order: 'desc', per_page: 100 }
       });
-      const milestones = milestonesResponse.data.result || [];
+      const milestones = (milestonesResponse.data.result || []).slice(0, 20);
 
       if (milestones.length === 0) return [];
 
