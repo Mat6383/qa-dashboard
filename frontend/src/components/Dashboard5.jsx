@@ -11,7 +11,32 @@ import {
     Loader2,
     AlertCircle
 } from 'lucide-react';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+    Filler
+} from 'chart.js';
 import apiService from '../services/api.service';
+
+// Register Chart.js components
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+    Filler
+);
 
 const Dashboard5 = ({ projectId, isDark, useBusiness }) => {
     const [trends, setTrends] = useState([]);
