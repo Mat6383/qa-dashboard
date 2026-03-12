@@ -51,74 +51,84 @@ const Dashboard3 = ({ metrics, project, isDark = false, useBusiness = true }) =>
                     {/* Escape Rate Card */}
                     <div className="metric-card tv-card" style={{
                         backgroundColor: 'var(--card-bg)',
-                        padding: '2rem',
+                        padding: '1.5rem',
                         borderRadius: '16px',
                         border: `2px solid ${escapeOk ? '#10B981' : '#EF4444'}`,
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                        borderLeftWidth: '12px',
+                        position: 'relative',
+                        overflow: 'hidden'
                     }}>
-                        <h2 style={{ fontSize: '1.5rem', color: 'var(--text-color)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <ShieldAlert size={28} />
-                            Taux d'Échappement (Escape Rate)
+                        <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.1 }}>
+                            <ShieldAlert size={120} color={escapeOk ? '#10B981' : '#EF4444'} />
+                        </div>
+                        <h2 style={{ fontSize: '1.35rem', color: 'var(--text-color)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', zIndex: 1, fontWeight: 700 }}>
+                            <ShieldAlert size={24} color={escapeOk ? '#10B981' : '#EF4444'} />
+                            Taux d'Échappement
                         </h2>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                            <div style={{ fontSize: '4.5rem', fontWeight: 800, color: escapeOk ? '#10B981' : '#EF4444' }}>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', zIndex: 1 }}>
+                            <div style={{ fontSize: '4rem', fontWeight: 800, color: escapeOk ? '#10B981' : '#EF4444', letterSpacing: '-2px' }}>
                                 {rates.escapeRate}%
                             </div>
-                            <span style={{ fontSize: '2rem', color: escapeOk ? '#10B981' : '#EF4444' }}>
-                                {escapeOk ? '▼' : '▲'} {/* Inversé: Moins c'est mieux */}
+                            <span style={{ fontSize: '1.5rem', color: escapeOk ? '#10B981' : '#EF4444' }}>
+                                {escapeOk ? '▼' : '▲'}
                             </span>
                         </div>
-                        <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', marginTop: '1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <span style={{ padding: '0.2rem 0.5rem', backgroundColor: escapeOk ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: escapeOk ? '#10B981' : '#EF4444', borderRadius: '4px', fontWeight: 600, fontSize: '1rem' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem', zIndex: 1 }}>
+                            <span style={{ padding: '0.2rem 0.6rem', backgroundColor: escapeOk ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: escapeOk ? '#10B981' : '#EF4444', borderRadius: '20px', fontWeight: 700, fontSize: '0.85rem', border: `1px solid ${escapeOk ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}` }}>
                                 Cible: &lt; 5%
                             </span>
-                        </p>
-                        <div style={{ marginTop: '1.5rem', width: '100%', padding: '1rem', backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: '8px', textAlign: 'center', color: 'var(--text-color)' }}>
-                            <span style={{ fontSize: '1.2rem', fontWeight: 600 }}>{rates.bugsInProd}</span>
-                            <span style={{ color: 'var(--text-muted)' }}> {useBusiness ? 'bugs trouvés en PROD' : 'bugs found in PROD'}</span>
-                            <br />
-                            <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{useBusiness ? 'Jalon' : 'Milestone'}: {rates.prodMilestone}</span>
+                        </div>
+                        <div style={{ marginTop: '1.25rem', width: '90%', padding: '0.75rem', backgroundColor: 'var(--bg-color)', borderRadius: '12px', textAlign: 'center', color: 'var(--text-color)', zIndex: 1, border: '1px solid var(--border-color)' }}>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>{rates.bugsInProd}</div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>{useBusiness ? 'bugs prod' : 'prod bugs'}</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.25rem' }}>{useBusiness ? 'Jalon' : 'Milestone'}: <strong>{rates.prodMilestone}</strong></div>
                         </div>
                     </div>
 
                     {/* Detection Rate Card */}
                     <div className="metric-card tv-card" style={{
                         backgroundColor: 'var(--card-bg)',
-                        padding: '2rem',
+                        padding: '1.5rem',
                         borderRadius: '16px',
                         border: `2px solid ${ddpOk ? '#10B981' : '#EF4444'}`,
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+                        borderLeftWidth: '12px',
+                        position: 'relative',
+                        overflow: 'hidden'
                     }}>
-                        <h2 style={{ fontSize: '1.5rem', color: 'var(--text-color)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <ShieldCheck size={28} />
-                            Taux de Détection (DDP)
+                        <div style={{ position: 'absolute', top: '-10px', right: '-10px', opacity: 0.1 }}>
+                            <ShieldCheck size={120} color={ddpOk ? '#10B981' : '#EF4444'} />
+                        </div>
+                        <h2 style={{ fontSize: '1.35rem', color: 'var(--text-color)', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', zIndex: 1, fontWeight: 700 }}>
+                            <ShieldCheck size={24} color={ddpOk ? '#10B981' : '#EF4444'} />
+                            Taux de Détection
                         </h2>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-                            <div style={{ fontSize: '4.5rem', fontWeight: 800, color: ddpOk ? '#10B981' : '#EF4444' }}>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem', zIndex: 1 }}>
+                            <div style={{ fontSize: '4rem', fontWeight: 800, color: ddpOk ? '#10B981' : '#EF4444', letterSpacing: '-2px' }}>
                                 {rates.detectionRate}%
                             </div>
-                            <span style={{ fontSize: '2rem', color: ddpOk ? '#10B981' : '#EF4444' }}>
+                            <span style={{ fontSize: '1.5rem', color: ddpOk ? '#10B981' : '#EF4444' }}>
                                 {ddpOk ? '▲' : '▼'}
                             </span>
                         </div>
-                        <p style={{ fontSize: '1.2rem', color: 'var(--text-muted)', marginTop: '1rem', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                            <span style={{ padding: '0.2rem 0.5rem', backgroundColor: ddpOk ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: ddpOk ? '#10B981' : '#EF4444', borderRadius: '4px', fontWeight: 600, fontSize: '1rem' }}>
+                        <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem', zIndex: 1 }}>
+                            <span style={{ padding: '0.2rem 0.6rem', backgroundColor: ddpOk ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: ddpOk ? '#10B981' : '#EF4444', borderRadius: '20px', fontWeight: 700, fontSize: '0.85rem', border: `1px solid ${ddpOk ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)'}` }}>
                                 Cible: &gt; 95%
                             </span>
-                        </p>
-                        <div style={{ marginTop: '1.5rem', width: '100%', padding: '1rem', backgroundColor: 'rgba(0,0,0,0.05)', borderRadius: '8px', textAlign: 'center', color: 'var(--text-color)' }}>
-                            <span style={{ fontSize: '1.2rem', fontWeight: 600 }}>{rates.bugsInTest}</span>
-                            <span style={{ color: 'var(--text-muted)' }}> {useBusiness ? 'bugs trouvés en TEST' : 'bugs found in TEST'}</span>
-                            <br />
-                            <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>{useBusiness ? 'Jalon' : 'Milestone'}: {rates.prodMilestone}</span>
+                        </div>
+                        <div style={{ marginTop: '1.25rem', width: '90%', padding: '0.75rem', backgroundColor: 'var(--bg-color)', borderRadius: '12px', textAlign: 'center', color: 'var(--text-color)', zIndex: 1, border: '1px solid var(--border-color)' }}>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>{rates.bugsInTest}</div>
+                            <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 600 }}>{useBusiness ? 'bugs test' : 'test bugs'}</div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.25rem', borderTop: '1px solid var(--border-color)', paddingTop: '0.25rem' }}>{useBusiness ? 'Lié' : 'Linked'}: <strong>{rates.prodMilestone}</strong></div>
                         </div>
                     </div>
                 </div>

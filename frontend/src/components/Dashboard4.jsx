@@ -299,30 +299,64 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '0.75rem', marginBottom: '0.5rem' }}>
 
                         {/* Escape Rate */}
-                        <div style={{ backgroundColor: 'var(--card-bg)', padding: '0.75rem', borderRadius: '8px', border: `2px solid ${escapeOk ? '#10B981' : '#EF4444'}`, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                            <div>
-                                <h3 style={{ margin: '0 0 0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)', fontSize: '1.3rem' }}>
-                                    <ShieldAlert size={20} /> Taux d'Échappement (Escape Rate)
+                        <div style={{ 
+                            backgroundColor: 'var(--card-bg)', 
+                            padding: '1.25rem', 
+                            borderRadius: '12px', 
+                            border: `2px solid ${escapeOk ? '#10B981' : '#EF4444'}`, 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'space-between',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                            borderLeftWidth: '8px'
+                        }}>
+                            <div style={{ flex: 1 }}>
+                                <h3 style={{ margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)', fontSize: '1.25rem' }}>
+                                    <ShieldAlert size={24} color={escapeOk ? '#10B981' : '#EF4444'} /> Taux d'Échappement
                                 </h3>
-                                <div style={{ fontSize: '1.05rem', color: 'var(--text-muted)' }}>{useBusiness ? 'Jalon' : 'Milestone'}: {rates.prodMilestone} | {useBusiness ? 'Objectif' : 'Target'} &lt; 5%</div>
+                                <div style={{ fontSize: '0.95rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                                    <span>{useBusiness ? 'Jalon' : 'Milestone'}: <strong style={{ color: 'var(--text-color)' }}>{rates.prodMilestone}</strong></span>
+                                    <span>{useBusiness ? 'Objectif' : 'Target'}: <strong style={{ color: escapeOk ? '#10B981' : '#EF4444' }}>&lt; 5%</strong></span>
+                                </div>
                             </div>
-                            <div style={{ textAlign: 'right', marginTop: '0.5rem' }}>
-                                <div style={{ fontSize: '2rem', fontWeight: 800, color: escapeOk ? '#10B981' : '#EF4444' }}>{rates.escapeRate}%</div>
-                                <div style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>{rates.bugsInProd} {useBusiness ? 'bugs prod' : 'prod bugs'}</div>
+                            <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                                <div style={{ fontSize: '2.5rem', fontWeight: 800, color: escapeOk ? '#10B981' : '#EF4444', lineHeight: 1 }}>
+                                    {rates.escapeRate}%
+                                </div>
+                                <div style={{ fontSize: '1rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '0.25rem', padding: '0.2rem 0.5rem', backgroundColor: 'var(--bg-color)', borderRadius: '4px' }}>
+                                    {rates.bugsInProd} {useBusiness ? 'bugs prod' : 'prod bugs'}
+                                </div>
                             </div>
                         </div>
 
                         {/* Detection Rate (DDP) */}
-                        <div style={{ backgroundColor: 'var(--card-bg)', padding: '0.75rem', borderRadius: '8px', border: `2px solid ${ddpOk ? '#10B981' : '#EF4444'}`, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                            <div>
-                                <h3 style={{ margin: '0 0 0.25rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)', fontSize: '1.3rem' }}>
-                                    <ShieldCheck size={20} /> Taux de Détection (DDP)
+                        <div style={{ 
+                            backgroundColor: 'var(--card-bg)', 
+                            padding: '1.25rem', 
+                            borderRadius: '12px', 
+                            border: `2px solid ${ddpOk ? '#10B981' : '#EF4444'}`, 
+                            display: 'flex', 
+                            alignItems: 'center', 
+                            justifyContent: 'space-between',
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                            borderLeftWidth: '8px'
+                        }}>
+                            <div style={{ flex: 1 }}>
+                                <h3 style={{ margin: '0 0 0.5rem 0', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-color)', fontSize: '1.25rem' }}>
+                                    <ShieldCheck size={24} color={ddpOk ? '#10B981' : '#EF4444'} /> Taux de Détection
                                 </h3>
-                                <div style={{ fontSize: '1.05rem', color: 'var(--text-muted)' }}>{useBusiness ? 'Lié' : 'Linked'}: {rates.prodMilestone} | {useBusiness ? 'Objectif' : 'Target'} &gt; 95%</div>
+                                <div style={{ fontSize: '0.95rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+                                    <span>{useBusiness ? 'Lié' : 'Linked'}: <strong style={{ color: 'var(--text-color)' }}>{rates.prodMilestone}</strong></span>
+                                    <span>{useBusiness ? 'Objectif' : 'Target'}: <strong style={{ color: ddpOk ? '#10B981' : '#EF4444' }}>&gt; 95%</strong></span>
+                                </div>
                             </div>
-                            <div style={{ textAlign: 'right', marginTop: '0.5rem' }}>
-                                <div style={{ fontSize: '2rem', fontWeight: 800, color: ddpOk ? '#10B981' : '#EF4444' }}>{rates.detectionRate}%</div>
-                                <div style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>{rates.bugsInTest} {useBusiness ? 'bugs test' : 'test bugs'}</div>
+                            <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                                <div style={{ fontSize: '2.5rem', fontWeight: 800, color: ddpOk ? '#10B981' : '#EF4444', lineHeight: 1 }}>
+                                    {rates.detectionRate}%
+                                </div>
+                                <div style={{ fontSize: '1rem', color: 'var(--text-muted)', fontWeight: 600, marginTop: '0.25rem', padding: '0.2rem 0.5rem', backgroundColor: 'var(--bg-color)', borderRadius: '4px' }}>
+                                    {rates.bugsInTest} {useBusiness ? 'bugs test' : 'test bugs'}
+                                </div>
                             </div>
                         </div>
                     </div>
