@@ -668,7 +668,7 @@ class TestmoService {
     }
 
     try {
-      // 1. Récupérer les 20 derniers jalons
+      // 1. Récupérer les 20 derniers jalons (Milestones)
       const milestonesResponse = await this.client.get(`/projects/${projectId}/milestones`, {
         params: { sort: 'milestones:created_at', order: 'desc', per_page: 20 }
       });
@@ -676,27 +676,31 @@ class TestmoService {
 
       if (milestones.length === 0) return [];
 
-      // 2. Récupérer TOUS les runs pour ces jalons (batching pour éviter trop de requêtes)
-      const milestoneIds = milestones.map(m => m.id);
-      
-      // On requête par groupe de milestones pour éviter de saturer l'API
-      const runPromises = milestoneIds.map(mId => 
-        Promise.all([
-          this.client.get(`/projects/${projectId}/runs`, { params: { milestone_id: mId, is_closed: 0, per_page: 50, expands: 'milestones' } }),
-          this.client.get(`/projects/${projectId}/runs`, { params: { milestone_id: mId, is_closed: 1, per_page: 50, expands: 'milestones' } })
-        ])
-      );
+      // 2. Récupérer les runs en VRAC (Bulk) pour le projet (LEAN)
+      // On récupère les 200 derniers runs (ouverts et fermés) pour couvrir les 20 jalons
+      const [activeRunsResp, closedRunsResp] = await Promise.all([
+        this.client.get(`/projects/${projectId}/runs`, { 
+          params: { is_closed: 0, per_page: 100, expands: 'milestones' } 
+        }),
+        this.client.get(`/projects/${projectId}/runs`, { 
+          params: { is_closed: 1, per_page: 100, expands: 'milestones' } 
+        })
+      ]);
 
-      const allRunsData = await Promise.all(runPromises);
+      const allRuns = [
+        ...(activeRunsResp.data.result || []),
+        ...(closedRunsResp.data.result || [])
+      ];
+
+      // Grouper les runs par milestoneId pour un accès rapide
       const runsByMilestone = new Map();
-
-      allRunsData.forEach((responses, index) => {
-        const mId = milestoneIds[index];
-        const combinedRuns = [
-          ...(responses[0].data.result || []),
-          ...(responses[1].data.result || [])
-        ];
-        runsByMilestone.set(mId, combinedRuns);
+      allRuns.forEach(run => {
+        if (run.milestone_id) {
+          if (!runsByMilestone.has(run.milestone_id)) {
+            runsByMilestone.set(run.milestone_id, []);
+          }
+          runsByMilestone.get(run.milestone_id).push(run);
+        }
       });
 
       // 3. Traitement des données par milestone
@@ -710,20 +714,19 @@ class TestmoService {
       for (const m of milestones) {
         const milestoneRuns = runsByMilestone.get(m.id) || [];
         
+        // On ne traite que les jalons qui ont au moins un run (pour avoir de la donnée)
         if (milestoneRuns.length === 0) continue;
 
         const preprodRuns = milestoneRuns.filter(r => !isProdRunFn(r.name));
         const prodRuns = milestoneRuns.filter(r => isProdRunFn(r.name));
 
+        // On a besoin d'au moins un run de test OU de prod pour calculer quelque chose
         if (preprodRuns.length === 0 && prodRuns.length === 0) continue;
 
         // Calcul bugs en TEST
         const bugsInTest = preprodRuns.reduce((acc, r) => acc + (r.status2_count || 0), 0);
         
-        // Calcul bugs en PROD (Estimation basée sur status2_count si issues non expansées pour éviter plus de requêtes)
-        // Note: Dans les versions précédentes on utilisait les issues. Pour la tendance, on va utiliser status2_count 
-        // comme "proxy" si les issues ne sont pas dispos, ou faire un fetch groupé si possible.
-        // Vu que c'est une tendance ANNUELLE, la précision relative est plus importante que l'exactitude absolue par incident.
+        // Calcul bugs en PROD (status2_count dans les runs de patch/prod)
         const bugsInProd = prodRuns.reduce((acc, r) => acc + (r.status2_count || 0), 0);
 
         const totalBugs = bugsInTest + bugsInProd;
@@ -741,7 +744,7 @@ class TestmoService {
         });
       }
 
-      // Trier par date (chrono)
+      // Trier par date (chrono) pour le graphique
       const sortedTrends = trends.sort((a, b) => new Date(a.date) - new Date(b.date));
 
       this._setCache(cacheKey, sortedTrends);
