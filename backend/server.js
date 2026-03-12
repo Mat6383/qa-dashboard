@@ -184,6 +184,40 @@ app.get('/api/dashboard/:projectId/quality-rates', async (req, res) => {
 });
 
 /**
+ * Tendances annuelles de qualité (Dashboard 5)
+ * ISTQB: Test Process Improvement
+ */
+app.get('/api/dashboard/:projectId/annual-trends', async (req, res) => {
+  try {
+    const projectId = parseInt(req.params.projectId);
+
+    if (isNaN(projectId)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Project ID invalide'
+      });
+    }
+
+    logger.info(`Récupération Annual Trends pour projet ${projectId}`);
+    const trends = await testmoService.getAnnualQualityTrends(projectId);
+
+    res.json({
+      success: true,
+      data: trends,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    logger.error(`Erreur GET /api/dashboard/${req.params.projectId}/annual-trends:`, error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+/**
  * Liste des runs actifs d'un projet
  * ISTQB: Test Monitoring
  */

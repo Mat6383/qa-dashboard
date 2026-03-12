@@ -21,6 +21,7 @@ import RunsList from './components/RunsList';
 import TvDashboard from './components/TvDashboard';
 import Dashboard3 from './components/Dashboard3';
 import Dashboard4 from './components/Dashboard4';
+import Dashboard5 from './components/Dashboard5';
 import ConfigurationScreen from './components/ConfigurationScreen';
 import {
   RefreshCw,
@@ -307,7 +308,8 @@ function App() {
               <option value="2">Dashboard 2 (TV)</option>
               <option value="3">Dashboard 3 (Quality Rates)</option>
               <option value="4">Dashboard 4 (Vue Globale & PDF)</option>
-              <option value="5">⚙️ Configuration des Cycles</option>
+              <option value="5">Dashboard 5 (Tendances Annuelles)</option>
+              <option value="6">⚙️ Configuration des Cycles</option>
             </select>
           </div>
 
@@ -400,6 +402,12 @@ function App() {
             setExportHandler={setExportHandler}
           />
         ) : dashboardView === '5' ? (
+          <Dashboard5
+            projectId={projectId}
+            isDark={darkMode}
+            useBusiness={useBusinessTerms}
+          />
+        ) : dashboardView === '6' ? (
           <ConfigurationScreen
             projectId={projectId}
             isDark={darkMode}

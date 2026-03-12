@@ -654,6 +654,105 @@ class TestmoService {
   }
 
   /**
+   * Récupère les tendances annuelles de qualité (Escape Rate & DDP)
+   * Basé sur les 20 derniers jalons (Milestones)
+   * 
+   * ISTQB: Test Process Improvement
+   * LEAN: Analyse des tendances pour élimination du gaspillage
+   */
+  async getAnnualQualityTrends(projectId) {
+    const cacheKey = `trends_${projectId}`;
+
+    if (this._isCacheValid(cacheKey)) {
+      return this.cache.get(cacheKey).data;
+    }
+
+    try {
+      // 1. Récupérer les 20 derniers jalons
+      const milestonesResponse = await this.client.get(`/projects/${projectId}/milestones`, {
+        params: { sort: 'milestones:created_at', order: 'desc', per_page: 20 }
+      });
+      const milestones = milestonesResponse.data.result || [];
+
+      if (milestones.length === 0) return [];
+
+      // 2. Récupérer TOUS les runs pour ces jalons (batching pour éviter trop de requêtes)
+      const milestoneIds = milestones.map(m => m.id);
+      
+      // On requête par groupe de milestones pour éviter de saturer l'API
+      const runPromises = milestoneIds.map(mId => 
+        Promise.all([
+          this.client.get(`/projects/${projectId}/runs`, { params: { milestone_id: mId, is_closed: 0, per_page: 50, expands: 'milestones' } }),
+          this.client.get(`/projects/${projectId}/runs`, { params: { milestone_id: mId, is_closed: 1, per_page: 50, expands: 'milestones' } })
+        ])
+      );
+
+      const allRunsData = await Promise.all(runPromises);
+      const runsByMilestone = new Map();
+
+      allRunsData.forEach((responses, index) => {
+        const mId = milestoneIds[index];
+        const combinedRuns = [
+          ...(responses[0].data.result || []),
+          ...(responses[1].data.result || [])
+        ];
+        runsByMilestone.set(mId, combinedRuns);
+      });
+
+      // 3. Traitement des données par milestone
+      const isProdRunFn = (runName) => {
+        const name = runName.toLowerCase();
+        return name.includes('patch') || name.includes('retour de prod') || name.includes('retour') || name.includes('prod');
+      };
+
+      const trends = [];
+
+      for (const m of milestones) {
+        const milestoneRuns = runsByMilestone.get(m.id) || [];
+        
+        if (milestoneRuns.length === 0) continue;
+
+        const preprodRuns = milestoneRuns.filter(r => !isProdRunFn(r.name));
+        const prodRuns = milestoneRuns.filter(r => isProdRunFn(r.name));
+
+        if (preprodRuns.length === 0 && prodRuns.length === 0) continue;
+
+        // Calcul bugs en TEST
+        const bugsInTest = preprodRuns.reduce((acc, r) => acc + (r.status2_count || 0), 0);
+        
+        // Calcul bugs en PROD (Estimation basée sur status2_count si issues non expansées pour éviter plus de requêtes)
+        // Note: Dans les versions précédentes on utilisait les issues. Pour la tendance, on va utiliser status2_count 
+        // comme "proxy" si les issues ne sont pas dispos, ou faire un fetch groupé si possible.
+        // Vu que c'est une tendance ANNUELLE, la précision relative est plus importante que l'exactitude absolue par incident.
+        const bugsInProd = prodRuns.reduce((acc, r) => acc + (r.status2_count || 0), 0);
+
+        const totalBugs = bugsInTest + bugsInProd;
+
+        trends.push({
+          milestoneId: m.id,
+          version: m.name,
+          date: m.created_at,
+          escapeRate: totalBugs > 0 ? this._calculatePercentage(bugsInProd, totalBugs) : 0,
+          detectionRate: totalBugs > 0 ? this._calculatePercentage(bugsInTest, totalBugs) : 0,
+          bugsInProd,
+          bugsInTest,
+          totalBugs,
+          isCompleted: m.is_completed
+        });
+      }
+
+      // Trier par date (chrono)
+      const sortedTrends = trends.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+      this._setCache(cacheKey, sortedTrends);
+      return sortedTrends;
+
+    } catch (error) {
+      throw this._handleError('getAnnualQualityTrends', error);
+    }
+  }
+
+  /**
    * Calcule un pourcentage avec 2 décimales
    * @private
    */

@@ -166,6 +166,20 @@ const apiService = {
   },
 
   /**
+   * Récupère les tendances annuelles d'un projet
+   * 
+   * @param {number} projectId - ID du projet
+   */
+  async getAnnualTrends(projectId) {
+    try {
+      const response = await apiClient.get(`/dashboard/${projectId}/annual-trends`);
+      return response.data;
+    } catch (error) {
+      throw this._handleError('Get Annual Trends', error);
+    }
+  },
+
+  /**
    * Nettoie le cache backend
    */
   async clearCache() {
