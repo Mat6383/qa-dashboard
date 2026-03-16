@@ -253,7 +253,7 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
                             <Database size={24} color="var(--color-primary)" /> Campagnes Actives (Préproduction)
                         </h3>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1rem' }}>
-                            {d1.runs.slice(0, 8).map(run => (
+                            {d1.runs.slice(0, d1.runs.length <= 12 ? 12 : 8).map(run => (
                                 <div key={run.id} style={{ padding: '1rem', backgroundColor: 'var(--bg-color)', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                                     <div style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-color)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                         {run.name}
@@ -278,9 +278,9 @@ const Dashboard4 = ({ metrics, project, isDark = false, useBusiness = true, setE
                                     </div>
                                 </div>
                             ))}
-                            {d1.runs.length > 8 && (
+                            {d1.runs.length > 12 && (
                                 <div style={{ padding: '1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '1.1rem', fontStyle: 'italic', border: '1px dashed var(--border-color)', borderRadius: '8px' }}>
-                                    + {d1.runs.length - 8} autres campagnes...
+                                    + {d1.runs.length - 8} {useBusiness ? 'autres campagnes...' : 'other campaigns...'}
                                 </div>
                             )}
                         </div>
