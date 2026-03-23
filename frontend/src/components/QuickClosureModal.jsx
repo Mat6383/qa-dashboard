@@ -131,7 +131,12 @@ const QuickClosureModal = ({ isOpen, onClose, metrics, project, useBusiness, isD
                 <div style={{ padding: '1.2rem 1.5rem', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: 'var(--card-bg)' }}>
                     <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.75rem', fontSize: '1.4rem', color: 'var(--text-color)' }}>
                         <FileText size={28} color="#3B82F6" />
-                        Quick Clôture (DOCX)
+                        Quick Clôture ISTQB (DOCX)
+                        {metrics?.preprodMilestone && (
+                            <span style={{ fontSize: '0.85rem', fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.5rem' }}>
+                                – {metrics.preprodMilestone}
+                            </span>
+                        )}
                     </h2>
                     <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
                         <X size={28} />
@@ -141,7 +146,7 @@ const QuickClosureModal = ({ isOpen, onClose, metrics, project, useBusiness, isD
                 {/* BODY */}
                 <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column', gap: '1.5rem', color: 'var(--text-color)' }}>
                     <p style={{ margin: 0, color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-                        Ce module génère un document Word (.docx) reprenant les données actuelles de la campagne. Vous pouvez sélectionner jusqu'à 2 campagnes précédentes pour les consolider dans la partie LEAN (Efficience).
+                        Génère un rapport de clôture de test conforme <strong>ISTQB Foundation v4.0</strong> : périmètre, résultats, critères de sortie, anomalies, risques résiduels, décision Go/No-Go, REX et archivage. Sélectionnez jusqu'à 2 campagnes historiques pour la consolidation LEAN.
                     </p>
 
                     <div>
