@@ -408,6 +408,58 @@ app.post('/api/cache/clear', (req, res) => {
 });
 
 // ==========================================
+// ROUTES SYNC GitLab → Testmo
+// ==========================================
+const syncService = require('./services/sync.service');
+
+/**
+ * Test API Testmo — Valide les endpoints folders/cases (beta)
+ * Crée un dossier [TEST-API] R06 > R06 - run 1 + un case de test
+ */
+app.post('/api/sync/test-api', async (req, res) => {
+  try {
+    logger.info('Lancement test API Testmo...');
+    const result = await syncService.testTestmoApi();
+    res.json({ success: result.success, data: result, timestamp: new Date().toISOString() });
+  } catch (error) {
+    logger.error('Erreur POST /api/sync/test-api:', error);
+    res.status(500).json({ success: false, error: error.message, timestamp: new Date().toISOString() });
+  }
+});
+
+/**
+ * Synchronise une itération GitLab vers Testmo
+ * Body: { iteration: "R06 - run 1", isTest: false, dryRun: false }
+ */
+app.post('/api/sync/iteration', async (req, res) => {
+  try {
+    const { iteration, isTest = false, dryRun = false } = req.body;
+    if (!iteration) {
+      return res.status(400).json({ success: false, error: 'Paramètre "iteration" requis' });
+    }
+    logger.info(`Lancement sync itération "${iteration}"...`);
+    const result = await syncService.syncIteration(iteration, { isTest, dryRun });
+    res.json({ success: true, data: result, timestamp: new Date().toISOString() });
+  } catch (error) {
+    logger.error('Erreur POST /api/sync/iteration:', error);
+    res.status(500).json({ success: false, error: error.message, timestamp: new Date().toISOString() });
+  }
+});
+
+/**
+ * Nettoyage du dossier de test [TEST-API]
+ */
+app.delete('/api/sync/test-cleanup', async (req, res) => {
+  try {
+    const result = await syncService.cleanupTestFolder();
+    res.json({ success: result.success, data: result, timestamp: new Date().toISOString() });
+  } catch (error) {
+    logger.error('Erreur DELETE /api/sync/test-cleanup:', error);
+    res.status(500).json({ success: false, error: error.message, timestamp: new Date().toISOString() });
+  }
+});
+
+// ==========================================
 // Gestion des erreurs 404
 // ==========================================
 app.use((req, res) => {
